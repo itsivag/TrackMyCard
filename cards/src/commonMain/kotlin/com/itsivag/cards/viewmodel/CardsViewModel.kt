@@ -12,19 +12,29 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
-    private val _card = MutableStateFlow<CardDataModel?>(null)
-    val card: StateFlow<CardDataModel?> = _card.asStateFlow()
+    private val _card = MutableStateFlow<UIState>(UIState.Loading)
+    val card: StateFlow<UIState> = _card.asStateFlow()
+
+    init {
+        getCard()
+    }
 
     fun getCard() {
         viewModelScope.launch(Dispatchers.IO) {
             cardsRepo.getCard("").apply {
                 if (isSuccess) {
-                    _card.value = getOrNull()
+                    _card.value = UIState.Success(getOrNull())
                 } else {
-                    _card.value = null
+                    _card.value = UIState.Error(exceptionOrNull()?.message ?: "Error getting card")
                 }
 
             }
         }
     }
+}
+
+sealed class UIState {
+    data class Success(val cardDataModel: CardDataModel?) : UIState()
+    data class Error(val message: String) : UIState()
+    data object Loading : UIState()
 }
