@@ -1,11 +1,8 @@
 package org.itsivag.trackmycard
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -15,16 +12,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.unit.sp
 import com.itsivag.cards.di.cardsModule
-import com.itsivag.cards.viewmodel.CardsViewModel
-import com.itsivag.cards.viewmodel.UIState
+import com.itsivag.helper.DmSansFontFamily
+import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.theme.TrackMyCardTheme
 import org.koin.compose.KoinContext
-import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
 
 @Composable
@@ -41,56 +37,14 @@ fun App() {
     }
 
     TrackMyCardTheme(darkTheme = isDarkTheme) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background,
-        ) {
-            KoinContext {
-                Sample()
-            }
-        }
-    }
-}
-
-@Composable
-fun Sample(
-    viewModel: CardsViewModel = koinViewModel<CardsViewModel>()
-) {
-
-    val uiState by viewModel.card.collectAsStateWithLifecycle()
-
-    when (uiState) {
-        is UIState.Error -> {
-            print((uiState as UIState.Error).message)
-        }
-
-        UIState.Loading -> {
-            CircularProgressIndicator()
-        }
-
-        is UIState.Success -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+        KoinContext {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background,
             ) {
-                Text(
-                    text = (uiState as UIState.Success).cardDataModel?.card?.cardName
-                        ?: "No card loaded",
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
 
-                Button(
-                    onClick = { viewModel.getCard() },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    Text("Get Card")
-                }
             }
         }
     }
-
 }
+
