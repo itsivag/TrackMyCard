@@ -29,12 +29,12 @@ kotlin {
     }
 
     sourceSets {
-
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 //            ktor
             implementation(libs.ktor.client.okhttp)
+            implementation(project(":cards"))
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -50,9 +50,18 @@ kotlin {
 //            coroutines
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
+//            cards
+            implementation(project(":cards"))
+//            viewmodel
+            implementation(libs.lifecycle.viewmodel.compose)
+//            koin
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(project(":cards"))
         }
     }
 }
