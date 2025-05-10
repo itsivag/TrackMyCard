@@ -1,15 +1,11 @@
 package org.itsivag.trackmycard
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.itsivag.trackmycard.theme.TrackMyCardTheme
 
@@ -17,30 +13,33 @@ import org.itsivag.trackmycard.theme.TrackMyCardTheme
 expect fun isSystemInDarkTheme(): Boolean
 
 @Composable
-@Preview
 fun App() {
     val isDarkTheme = isSystemInDarkTheme()
-
+    val scope = rememberCoroutineScope()
+    var text by remember { mutableStateOf("Loading") }
+    
+    LaunchedEffect(Unit) {
+        scope.launch {
+            text = try {
+                Greeting().greeting()
+            } catch (e: Exception) {
+                e.message ?: "An error occurred"
+            }
+        }
+    }
+    
     TrackMyCardTheme(darkTheme = isDarkTheme) {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-        ) { paddingValues ->
-            Box(
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colors.background
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center
             ) {
-                Button(
-                    onClick = {},
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.TopStart)
-                ) {
-                    Text("Button")
-                }
+                Text(text = text)
             }
         }
     }
