@@ -6,6 +6,14 @@
   "networkType": "Visa",
   "targetAudience": "Online shoppers, especially Flipkart users",
   "applyLink": "https://web.axisbank.co.in/DigitalChannel/WebForm/?ipa21&axisreferralcode=webs",
+  "decoration": {
+    "primaryColor": "#2874f0",
+    "secondaryColor": "#ffffff",
+    "orientation": "Horizontal",
+    "cardImage": "https://www.axisbank.com/images/default-source/revamp_new/cards/flipkart-axis-bank-credit-card.png",
+    "material": "Plastic",
+    "specialFeatures": "Contactless payment enabled"
+  },
   "fees": {
     "joiningFee": "₹500 + GST",
     "renewalFee": "₹500 + GST",
