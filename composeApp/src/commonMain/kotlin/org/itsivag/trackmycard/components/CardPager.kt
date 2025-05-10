@@ -1,15 +1,14 @@
 package org.itsivag.trackmycard.components
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import kotlin.math.absoluteValue
 
 @Composable
 fun CardPager(
@@ -17,14 +16,13 @@ fun CardPager(
     modifier: Modifier = Modifier
 ) {
     val pagerState = rememberPagerState { cards.size }
+    val width = LocalWindowInfo.current.containerSize.width
 
     HorizontalPager(
         state = pagerState,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        pageSpacing = 16.dp,
-        contentPadding = PaddingValues(end = 32.dp)
+            .fillMaxWidth(),
+        contentPadding = PaddingValues(start = (width * 0.02f).dp, end = (width * 0.02f).dp)
     ) { page ->
         CreditCard(
             cardInfo = cards[page],

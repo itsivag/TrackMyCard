@@ -1,11 +1,10 @@
 package org.itsivag.trackmycard
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,9 +15,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.itsivag.cards.di.cardsModule
-import org.itsivag.trackmycard.components.CardPager
 import org.itsivag.trackmycard.components.CreditCardInfo
 import org.itsivag.trackmycard.components.TopAppBar
 import org.itsivag.trackmycard.theme.TrackMyCardTheme
@@ -76,17 +80,25 @@ fun App() {
                 },
                 modifier = Modifier.fillMaxSize(),
             ) { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    CardPager(
-                        cards = sampleCards,
-                        modifier = Modifier.fillMaxSize()
+
+                val config = LocalWindowInfo.current
+                val height = config.containerSize.height
+
+                Box {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalPlatformContext.current)
+                            .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "WebP Image",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().height((height * 0.15).dp)
                     )
+                    TransactionsScreen(paddingValues, sampleCards)
                 }
             }
+
         }
     }
 }
+

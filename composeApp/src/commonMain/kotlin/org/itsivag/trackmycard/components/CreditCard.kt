@@ -31,14 +31,6 @@ data class CreditCardInfo(
 )
 
 @Composable
-fun defaultGradientColors(): List<Color> {
-    return listOf(
-        MaterialTheme.colors.primary,
-        MaterialTheme.colors.primaryVariant
-    )
-}
-
-@Composable
 fun CreditCard(
     cardInfo: CreditCardInfo,
     modifier: Modifier = Modifier
@@ -62,7 +54,7 @@ fun CreditCard(
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(-16.dp),
+                    .padding((-16).dp),
                 contentScale = ContentScale.Crop,
                 alpha = cardInfo.backgroundImageAlpha
             )
@@ -72,7 +64,6 @@ fun CreditCard(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Card Type and Logo
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,10 +76,8 @@ fun CreditCard(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
-                // You can add card provider logo here
             }
 
-            // Card Number
             Text(
                 text = formatCardNumber(cardInfo.cardNumber),
                 color = MaterialTheme.colors.onPrimary,
@@ -98,7 +87,6 @@ fun CreditCard(
                 letterSpacing = 2.sp
             )
 
-            // Card Holder Name and Expiry Date
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

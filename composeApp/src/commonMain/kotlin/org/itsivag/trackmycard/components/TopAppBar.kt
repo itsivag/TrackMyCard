@@ -1,9 +1,15 @@
 package org.itsivag.trackmycard.components
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -23,12 +29,12 @@ fun TopAppBar(
         backgroundColor = MaterialTheme.colors.background,
         contentColor = MaterialTheme.colors.onBackground,
     ) {
-        Text(
-            text = title,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
-            fontFamily = OnestFontFamily(),
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp
-        )
+        IconButton(onClick = {}) {
+            Icon(imageVector = Icons.Default.Menu, contentDescription = "Menu")
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(onClick = {}) {
+            Icon(imageVector = Icons.Default.Person, contentDescription = "Profile")
+        }
     }
 }
