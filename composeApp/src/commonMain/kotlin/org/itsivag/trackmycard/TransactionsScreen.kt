@@ -1,8 +1,13 @@
 package org.itsivag.trackmycard
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,15 +24,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.components.CardPager
 import org.itsivag.trackmycard.components.CreditCardInfo
+import org.itsivag.trackmycard.components.CustomLinearProgressIndicator
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
+import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
 
 @Composable
@@ -51,40 +64,11 @@ internal fun TransactionsScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         }
-
-//        item {
-//            Row(modifier = Modifier.padding(16.dp)) {
-//                Button(
-//                    onClick = {},
-//                    shape = RoundedCornerShape(16.dp),
-//                    colors = ButtonDefaults.buttonColors(backgroundColor = surfaceColor)
-//                ) {
-//                    Column(horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-//                        Icon(
-//                            Icons.Default.Add,
-//                            contentDescription = "Add Transaction",
-//                            modifier = Modifier.size(48.dp)
-//                        )
-//                        Text(
-//                            text = "Add Transaction",
-//                            fontFamily = DmSansFontFamily(),
-//                            fontWeight = FontWeight.Medium
-//                        )
-//                    }
-//                }
-//            }
-//        }
-
         item {
-            LinearProgressIndicator(
-                progress = 0.7f,
-                modifier = Modifier.height(50.dp).fillMaxWidth()
-                    .padding(vertical = 16.dp, horizontal = 32.dp)
+            CustomLinearProgressIndicator(
+                progress = 0.5f,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 32.dp)
             )
-            Row(modifier = Modifier.padding(16.dp)) {
-                Text("Limit utilised: 2000")
-                Text("Max Limit: 20000")
-            }
         }
         item {
             Text(
@@ -97,3 +81,32 @@ internal fun TransactionsScreen(
         }
     }
 }
+
+@Composable
+internal fun CustomProgressIndicatorLabel(label: String, value: String) {
+    Text(text = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                fontFamily = DmSansFontFamily(),
+                fontWeight = FontWeight.Medium,
+                fontSize = 14.sp,
+                color = onBackgroundColor
+            )
+        ) {
+            append("$label : ")
+        }
+
+        withStyle(
+            style = SpanStyle(
+                fontFamily = DmSansFontFamily(),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                color = primaryColor
+            )
+        ) {
+            append(value)
+        }
+    })
+}
+
+

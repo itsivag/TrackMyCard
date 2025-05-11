@@ -22,6 +22,7 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import coil3.transform.Transformation
 import com.itsivag.cards.di.cardsModule
 import org.itsivag.trackmycard.components.CreditCardInfo
 import org.itsivag.trackmycard.components.TopAppBar
