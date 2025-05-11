@@ -6,7 +6,11 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
 }
+
+
 
 kotlin {
     androidTarget {
@@ -60,14 +64,19 @@ kotlin {
 //            coil
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
-//            implementation(libs.coil.network.okhttp)
+//            navigation
+            implementation(libs.navigation.compose)
             implementation(project(":helper"))
+//            room
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.sqlite.bundled)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
             implementation(project(":cards"))
         }
     }
+
 }
 
 android {
@@ -80,6 +89,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
     }
     packaging {
         resources {
@@ -97,7 +107,12 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
     debugImplementation(compose.uiTooling)
+    ksp(libs.androidx.room.compiler)
 }
 

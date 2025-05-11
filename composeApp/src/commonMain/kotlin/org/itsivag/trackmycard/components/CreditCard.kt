@@ -24,7 +24,7 @@ data class CreditCardInfo(
     val cardNumber: String,
     val cardHolderName: String,
     val expiryDate: String,
-    val cardType: String = "VISA", // Default to VISA, can be changed
+    val cardType: String = "VISA",
     val gradientColors: List<Color>,
     val backgroundImage: Painter? = null,
     val backgroundImageAlpha: Float = 0.2f
@@ -35,97 +35,102 @@ fun CreditCard(
     cardInfo: CreditCardInfo,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                brush = Brush.linearGradient(
-                    colors = cardInfo.gradientColors
+    Column {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(200.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    brush = Brush.linearGradient(
+                        colors = cardInfo.gradientColors
+                    )
                 )
-            )
-            .padding(16.dp)
-    ) {
-        // Background Image
-        cardInfo.backgroundImage?.let { painter ->
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding((-16).dp),
-                contentScale = ContentScale.Crop,
-                alpha = cardInfo.backgroundImageAlpha
-            )
-        }
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            cardInfo.backgroundImage?.let { painter ->
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding((-16).dp),
+                    contentScale = ContentScale.Crop,
+                    alpha = cardInfo.backgroundImageAlpha
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = cardInfo.cardType,
+                        color = MaterialTheme.colors.onPrimary,
+                        fontFamily = OnestFontFamily(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Text(
-                    text = cardInfo.cardType,
+                    text = formatCardNumber(cardInfo.cardNumber),
                     color = MaterialTheme.colors.onPrimary,
                     fontFamily = OnestFontFamily(),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 2.sp
                 )
-            }
 
-            Text(
-                text = formatCardNumber(cardInfo.cardNumber),
-                color = MaterialTheme.colors.onPrimary,
-                fontFamily = OnestFontFamily(),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 2.sp
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(
-                        text = "CARD HOLDER",
-                        color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
-                        fontFamily = OnestFontFamily(),
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = cardInfo.cardHolderName,
-                        color = MaterialTheme.colors.onPrimary,
-                        fontFamily = OnestFontFamily(),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = "EXPIRY",
-                        color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
-                        fontFamily = OnestFontFamily(),
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = cardInfo.expiryDate,
-                        color = MaterialTheme.colors.onPrimary,
-                        fontFamily = OnestFontFamily(),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text(
+                            text = "CARD HOLDER",
+                            color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
+                            fontFamily = OnestFontFamily(),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = cardInfo.cardHolderName,
+                            color = MaterialTheme.colors.onPrimary,
+                            fontFamily = OnestFontFamily(),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Column(horizontalAlignment = Alignment.End) {
+                        Text(
+                            text = "EXPIRY",
+                            color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
+                            fontFamily = OnestFontFamily(),
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            text = cardInfo.expiryDate,
+                            color = MaterialTheme.colors.onPrimary,
+                            fontFamily = OnestFontFamily(),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }
+        CustomLinearProgressIndicator(
+            progress = 0.5f,
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
+        )
     }
 }
 
 private fun formatCardNumber(cardNumber: String): String {
     return cardNumber.chunked(4).joinToString(" ")
-} 
+}
