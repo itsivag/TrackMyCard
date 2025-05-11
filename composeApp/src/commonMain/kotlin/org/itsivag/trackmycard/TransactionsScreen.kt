@@ -79,34 +79,31 @@ internal fun TransactionsScreen(
                 fontSize = 28.sp
             )
         }
+
+        items(10) {
+            Box(
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp)
+                    .background(color = surfaceColor)
+            ) {
+                Row {
+
+                    Text(
+                        text = "Zomato",
+                        fontFamily = DmSansFontFamily(),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "1000",
+                        fontFamily = DmSansFontFamily(),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp
+                    )
+                }
+            }
+        }
     }
-}
-
-@Composable
-internal fun CustomProgressIndicatorLabel(label: String, value: String) {
-    Text(text = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                fontFamily = DmSansFontFamily(),
-                fontWeight = FontWeight.Medium,
-                fontSize = 14.sp,
-                color = onBackgroundColor
-            )
-        ) {
-            append("$label : ")
-        }
-
-        withStyle(
-            style = SpanStyle(
-                fontFamily = DmSansFontFamily(),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp,
-                color = primaryColor
-            )
-        ) {
-            append(value)
-        }
-    })
 }
 
 

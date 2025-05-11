@@ -2,7 +2,6 @@ package org.itsivag.trackmycard.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -17,9 +16,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
-import org.itsivag.trackmycard.CustomProgressIndicatorLabel
-import org.itsivag.trackmycard.theme.onPrimaryColor
-import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
 
 @Composable
