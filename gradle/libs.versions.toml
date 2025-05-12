@@ -26,9 +26,9 @@ kotlinStdlib = "2.1.20"
 navigationCompose = "2.9.0-beta01"
 runner = "1.6.2"
 core = "1.6.1"
-room = "2.7.0-alpha13"
-ksp = "2.1.10-1.0.29"
-sqlite = "2.4.0"
+room = "2.7.1"
+ksp = "2.1.20-2.0.1"
+sqlite = "2.5.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
