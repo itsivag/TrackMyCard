@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
@@ -47,7 +45,6 @@ import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.itsivag.trackmycard.components.CardPager
 import org.itsivag.trackmycard.components.CreditCardInfo
 import org.itsivag.trackmycard.components.TransactionListItem
-import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 
