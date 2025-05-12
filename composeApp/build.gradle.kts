@@ -40,6 +40,9 @@ kotlin {
             implementation(project(":cards"))
         }
         commonMain.dependencies {
+            implementation(project(":helper"))
+            implementation(project(":cards"))
+            implementation(project(":transactions"))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)
@@ -55,7 +58,6 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
 //            cards
-            implementation(project(":cards"))
 //            viewmodel
             implementation(libs.lifecycle.viewmodel.compose)
 //            koin
@@ -67,7 +69,6 @@ kotlin {
             implementation(libs.coil.network.ktor3)
 //            navigation
             implementation(libs.navigation.compose)
-            implementation(project(":helper"))
 //            room
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)

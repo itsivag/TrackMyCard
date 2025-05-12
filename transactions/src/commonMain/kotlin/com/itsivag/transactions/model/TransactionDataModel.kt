@@ -1,15 +1,18 @@
 package com.itsivag.transactions.model
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-@Entity
+@Entity(tableName = "transactions")
 @Serializable
 data class TransactionDataModel(
+
     @SerialName("id")
-    val id: String,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
     @SerialName("title")
     val title: String,
     @SerialName("description")
