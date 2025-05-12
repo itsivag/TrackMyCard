@@ -10,6 +10,8 @@ val onPrimaryColor = Color(0xFF000000)
 val onBackgroundColor = Color(0xFFFFFFFF)
 val secondaryTextColor = Color(0xFFB3B3B3)
 
+val focusedColor = Color(0xFF2e2e2e)
+
 // Donut Chart Category Colors
 val transportColor = Color(0xFF15F5BA)
 val foodColor = Color(0xFF4A6CF7)
