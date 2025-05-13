@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -129,24 +131,23 @@ fun AddTransactionBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(16.dp).height(48.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
             TrackMyCardTextInputField(
                 label = "Date",
-                value = selectedDate?.let { 
+                value = selectedDate?.let {
                     SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
                         .format(Date(it))
                 } ?: "",
                 readOnly = true,
-                modifier = Modifier.weight(1f)
-            ) { 
+                modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 8.dp)
+            ) {
                 showDatePicker = true
             }
             Box(
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .size(64.dp),
+                    .padding(start = 8.dp).size(48.dp),
                 contentAlignment = androidx.compose.ui.Alignment.Center
             ) {
                 IconButton(
@@ -155,15 +156,12 @@ fun AddTransactionBottomSheet(
                     ),
                     onClick = { showDatePicker = true },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
                         .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Call,
                         contentDescription = "Select Date",
                         tint = primaryColor,
-                        modifier = Modifier.size(28.dp)
                     )
                 }
             }
