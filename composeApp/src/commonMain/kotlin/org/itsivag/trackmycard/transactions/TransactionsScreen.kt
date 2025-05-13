@@ -5,15 +5,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.LocalPlatformContext
 import com.itsivag.helper.OnestFontFamily
+import com.itsivag.transactions.data.getTransactionsDatabase
 import org.itsivag.trackmycard.components.TransactionListItem
 
 @Composable
 internal fun TransactionsScreen(padding: PaddingValues) {
+    val context = LocalPlatformContext.current
+    val dao = remember {
+        getTransactionsDatabase(context).transactionsDao()
+    }
+    val transactions by dao.getAllTransactions().collectAsState(initial = emptyList())
+
     LazyColumn(modifier = Modifier.padding(padding)) {
         item {
             Text(
@@ -24,8 +35,14 @@ internal fun TransactionsScreen(padding: PaddingValues) {
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-        items(10) {
-            TransactionListItem()
+        items(transactions.size) { index ->
+            val transaction = transactions[index]
+            TransactionListItem(
+                title = transaction.title,
+                description = transaction.description,
+                amount = transaction.amount,
+                dateTime = transaction.dateTime
+            )
         }
     }
 }

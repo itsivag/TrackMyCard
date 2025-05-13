@@ -47,6 +47,8 @@ import org.itsivag.trackmycard.components.CreditCardInfo
 import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
+import androidx.compose.runtime.collectAsState
+import com.itsivag.transactions.data.getTransactionsDatabase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,10 +56,15 @@ internal fun HomeScreen(
     paddingValues: PaddingValues,
     navigateToTransactionsScreen: () -> Unit,
 ) {
-
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+
+    val context = LocalPlatformContext.current
+    val dao = remember {
+        getTransactionsDatabase(context).transactionsDao()
+    }
+    val transactions by dao.getAllTransactions().collectAsState(initial = emptyList())
 
     val sampleCards = remember {
         listOf(
@@ -162,8 +169,15 @@ internal fun HomeScreen(
                 }
             }
         }
-        items(10) {
-            TransactionListItem()
+        
+        items(transactions.size.coerceAtMost(5)) { index ->
+            val transaction = transactions[index]
+            TransactionListItem(
+                title = transaction.title,
+                description = transaction.description,
+                amount = transaction.amount,
+                dateTime = transaction.dateTime
+            )
         }
     }
 }
