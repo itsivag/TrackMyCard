@@ -72,9 +72,9 @@ data class CardDataModel(
         @Serializable
         data class Decoration(
             @SerialName("primaryColor")
-            val primaryColor: String,
+            val primaryColor: Int,
             @SerialName("secondaryColor")
-            val secondaryColor: String,
+            val secondaryColor: Int,
             @SerialName("orientation")
             val orientation: String,
             @SerialName("cardImage")

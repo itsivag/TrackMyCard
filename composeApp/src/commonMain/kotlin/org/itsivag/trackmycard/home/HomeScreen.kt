@@ -43,7 +43,6 @@ import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.itsivag.trackmycard.components.CardPager
-import org.itsivag.trackmycard.components.CreditCardInfo
 import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
@@ -68,31 +67,6 @@ internal fun HomeScreen(
     }
     val transactions by dao.getAllTransactions().collectAsState(initial = emptyList())
 
-    val sampleCards = remember {
-        listOf(
-            CreditCardInfo(
-                cardNumber = "4532 1234 5678 9012",
-                cardHolderName = "JOHN DOE",
-                expiryDate = "12/25",
-                cardType = "VISA",
-                gradientColors = listOf(Color(0xFF1A237E), Color(0xFF3949AB))
-            ),
-            CreditCardInfo(
-                cardNumber = "5123 4567 8901 2345",
-                cardHolderName = "JANE SMITH",
-                expiryDate = "09/24",
-                cardType = "MASTERCARD",
-                gradientColors = listOf(Color(0xFFB71C1C), Color(0xFFD32F2F))
-            ),
-            CreditCardInfo(
-                cardNumber = "3782 8224 6310 0055",
-                cardHolderName = "MIKE JOHNSON",
-                expiryDate = "03/26",
-                cardType = "AMEX",
-                gradientColors = listOf(Color(0xFF1B5E20), Color(0xFF2E7D32))
-            )
-        )
-    }
     val config = LocalWindowInfo.current
     val height = rememberSaveable { config.containerSize.height }
 
@@ -117,7 +91,7 @@ internal fun HomeScreen(
                         .hazeSource(hazeState)
                 )
                 CardPager(
-                    cards = sampleCards,
+                    cards = listOf(),
                     modifier = Modifier.padding(bottom = 8.dp),
                     hazeState
                 )

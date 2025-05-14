@@ -19,6 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.OnestFontFamily
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
@@ -27,25 +28,21 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 
-data class CreditCardInfo(
-    val cardNumber: String,
-    val cardHolderName: String,
-    val expiryDate: String,
-    val cardType: String = "VISA",
-    val gradientColors: List<Color>,
-    val backgroundImage: Painter? = null,
-    val backgroundImageAlpha: Float = 0.2f
-)
 
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun CreditCard(
-    cardInfo: CreditCardInfo,
+    card: CardDataModel,
     modifier: Modifier = Modifier,
     hazeState: HazeState
 ) {
     val hazeStyle = HazeMaterials.regular(containerColor = backgroundColor)
-    val gradientBrush = Brush.linearGradient(cardInfo.gradientColors)
+    val gradientBrush = Brush.linearGradient(
+        listOf(
+            Color(card.presentation.decoration.primaryColor),
+            Color(card.presentation.decoration.secondaryColor),
+        )
+    )
     Column(
         modifier = modifier
             .border(brush = gradientBrush, width = 1.dp, shape = RoundedCornerShape(16.dp))
@@ -61,17 +58,17 @@ fun CreditCard(
                     style = hazeStyle
                 ).padding(16.dp)
         ) {
-            cardInfo.backgroundImage?.let { painter ->
-                Image(
-                    painter = painter,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize(),
-//                        .padding((-16).dp),
-                    contentScale = ContentScale.Fit,
-                    alpha = cardInfo.backgroundImageAlpha
-                )
-            }
+//            cardInfo.backgroundImage?.let { painter ->
+//                Image(
+//                    painter = painter,
+//                    contentDescription = null,
+//                    modifier = Modifier
+//                        .fillMaxSize(),
+////                        .padding((-16).dp),
+//                    contentScale = ContentScale.Fit,
+//                    alpha = cardInfo.backgroundImageAlpha
+//                )
+//            }
 
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -83,7 +80,7 @@ fun CreditCard(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = cardInfo.cardType,
+                        text = card.card.networkType,
                         color = Color.White,
                         fontFamily = OnestFontFamily(),
                         fontSize = 24.sp,
@@ -92,7 +89,7 @@ fun CreditCard(
                 }
 
                 Text(
-                    text = formatCardNumber(cardInfo.cardNumber),
+                    text = formatCardNumber(card.card.id),
                     color = Color.White,
                     fontFamily = OnestFontFamily(),
                     fontSize = 20.sp,
@@ -112,7 +109,7 @@ fun CreditCard(
                             fontSize = 12.sp
                         )
                         Text(
-                            text = cardInfo.cardHolderName,
+                            text = "Siva G",
                             color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
@@ -127,7 +124,7 @@ fun CreditCard(
                             fontSize = 12.sp
                         )
                         Text(
-                            text = cardInfo.expiryDate,
+                            text = "12/34",
                             color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
