@@ -72,6 +72,9 @@ kotlin {
 //            room
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
+//            haze - blur
+            implementation(libs.haze)
+            implementation(libs.haze.materials)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

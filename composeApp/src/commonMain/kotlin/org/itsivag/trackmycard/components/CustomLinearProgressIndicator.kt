@@ -16,28 +16,37 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import org.itsivag.trackmycard.theme.surfaceColor
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun CustomLinearProgressIndicator(
     modifier: Modifier = Modifier,
     progress: Float,
     progressColor: Color = surfaceColor,
     backgroundColor: Color = org.itsivag.trackmycard.theme.backgroundColor,
-    clipShape: Shape = RoundedCornerShape(12.dp)
+    clipShape: Shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp),
+    hazeState: HazeState,
+    hazeStyle: HazeStyle
 ) {
     Box(
         modifier = modifier
             .clip(clipShape)
             .background(backgroundColor)
             .fillMaxWidth()
-            .height(48.dp),
+            .height(48.dp).hazeEffect(hazeState, hazeStyle),
     ) {
         Box(
             modifier = Modifier
                 .background(progressColor)
                 .fillMaxHeight()
                 .fillMaxWidth(progress)
+                .hazeEffect(hazeState, HazeMaterials.thick(containerColor = progressColor))
         )
         Row(
             modifier = Modifier

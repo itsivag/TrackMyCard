@@ -31,7 +31,7 @@ internal fun CustomProgressIndicatorLabel(label: String, value: String) {
                 fontFamily = DmSansFontFamily(),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                color = primaryColor
+                color = onBackgroundColor
             )
         ) {
             append(value)

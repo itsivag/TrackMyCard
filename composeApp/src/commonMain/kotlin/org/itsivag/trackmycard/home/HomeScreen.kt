@@ -49,6 +49,8 @@ import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.compose.runtime.collectAsState
 import com.itsivag.transactions.data.getTransactionsDatabase
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +102,9 @@ internal fun HomeScreen(
             sheetState = sheetState
         )
     }
+    val hazeState = rememberHazeState()
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
+
         item {
             Box {
                 AsyncImage(
@@ -109,12 +113,13 @@ internal fun HomeScreen(
                         .crossfade(true)
                         .build(),
                     contentDescription = "WebP Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().height((height * 0.12).dp)
+                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
+                        .hazeSource(hazeState)
                 )
                 CardPager(
                     cards = sampleCards,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    hazeState
                 )
             }
         }
@@ -169,7 +174,7 @@ internal fun HomeScreen(
                 }
             }
         }
-        
+
         items(transactions.size.coerceAtMost(5)) { index ->
             val transaction = transactions[index]
             TransactionListItem(

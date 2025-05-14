@@ -9,11 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import dev.chrisbanes.haze.HazeState
 
 @Composable
 fun CardPager(
     cards: List<CreditCardInfo>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hazeState: HazeState
 ) {
     val pagerState = rememberPagerState { cards.size }
     val width = LocalWindowInfo.current.containerSize.width
@@ -28,7 +30,8 @@ fun CardPager(
             cardInfo = cards[page],
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
+                .padding(horizontal = 8.dp),
+            hazeState
         )
     }
 } 

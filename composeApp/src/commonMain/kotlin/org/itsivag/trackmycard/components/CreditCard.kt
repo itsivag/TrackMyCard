@@ -1,7 +1,9 @@
 package org.itsivag.trackmycard.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -15,10 +17,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.helper.OnestFontFamily
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
+import org.itsivag.trackmycard.theme.backgroundColor
+import org.itsivag.trackmycard.theme.primaryColor
 
 data class CreditCardInfo(
     val cardNumber: String,
@@ -30,32 +37,38 @@ data class CreditCardInfo(
     val backgroundImageAlpha: Float = 0.2f
 )
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun CreditCard(
     cardInfo: CreditCardInfo,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hazeState: HazeState
 ) {
-    Column {
+    val hazeStyle = HazeMaterials.regular(containerColor = backgroundColor)
+    val gradientBrush = Brush.linearGradient(cardInfo.gradientColors)
+    Column(
+        modifier = modifier
+            .border(brush = gradientBrush, width = 1.dp, shape = RoundedCornerShape(16.dp))
+
+    ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = cardInfo.gradientColors
-                    )
-                )
-                .padding(16.dp)
+                .clip(RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp))
+                .hazeEffect(
+                    state = hazeState,
+                    style = hazeStyle
+                ).padding(16.dp)
         ) {
             cardInfo.backgroundImage?.let { painter ->
                 Image(
                     painter = painter,
                     contentDescription = null,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding((-16).dp),
-                    contentScale = ContentScale.Crop,
+                        .fillMaxSize(),
+//                        .padding((-16).dp),
+                    contentScale = ContentScale.Fit,
                     alpha = cardInfo.backgroundImageAlpha
                 )
             }
@@ -67,11 +80,11 @@ fun CreditCard(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = cardInfo.cardType,
-                        color = MaterialTheme.colors.onPrimary,
+                        color = Color.White,
                         fontFamily = OnestFontFamily(),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold
@@ -80,7 +93,7 @@ fun CreditCard(
 
                 Text(
                     text = formatCardNumber(cardInfo.cardNumber),
-                    color = MaterialTheme.colors.onPrimary,
+                    color = Color.White,
                     fontFamily = OnestFontFamily(),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Medium,
@@ -94,13 +107,13 @@ fun CreditCard(
                     Column {
                         Text(
                             text = "CARD HOLDER",
-                            color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
+                            color = Color.White.copy(alpha = 0.7f),
                             fontFamily = OnestFontFamily(),
                             fontSize = 12.sp
                         )
                         Text(
                             text = cardInfo.cardHolderName,
-                            color = MaterialTheme.colors.onPrimary,
+                            color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
@@ -109,13 +122,13 @@ fun CreditCard(
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
                             text = "EXPIRY",
-                            color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f),
+                            color = Color.White.copy(alpha = 0.7f),
                             fontFamily = OnestFontFamily(),
                             fontSize = 12.sp
                         )
                         Text(
                             text = cardInfo.expiryDate,
-                            color = MaterialTheme.colors.onPrimary,
+                            color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
@@ -126,7 +139,10 @@ fun CreditCard(
         }
         CustomLinearProgressIndicator(
             progress = 0.5f,
-            modifier = Modifier.fillMaxWidth().padding(8.dp)
+            modifier = Modifier.fillMaxWidth(),
+            progressColor = primaryColor,
+            hazeState = hazeState,
+            hazeStyle = hazeStyle
         )
     }
 }
