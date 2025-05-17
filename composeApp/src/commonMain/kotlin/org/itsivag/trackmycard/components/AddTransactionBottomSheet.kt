@@ -235,16 +235,13 @@ internal fun TrackMyCardTextInputField(
         singleLine = singleLine,
         value = value,
         onValueChange = { newValue ->
-            if (!readOnly) {
-                if (singleLine && newValue.length <= 50) {
-                    onValueChange(newValue)
-                } else if (!singleLine) {
-                    onValueChange(newValue)
-                }
-            } else {
+            if (singleLine && newValue.length <= 50) {
+                onValueChange(newValue)
+            } else if (!singleLine) {
                 onValueChange(newValue)
             }
         },
+        readOnly = readOnly,
         label = { Text(label, color = Color.White, fontFamily = DmSansFontFamily()) },
         shape = RoundedCornerShape(16.dp),
         textStyle = TextStyle(

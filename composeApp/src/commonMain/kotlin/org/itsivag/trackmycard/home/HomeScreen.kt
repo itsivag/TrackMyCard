@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,16 +27,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
@@ -48,8 +41,8 @@ import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.compose.runtime.collectAsState
 import com.itsivag.transactions.data.getTransactionsDatabase
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import org.itsivag.trackmycard.components.AddCardBottomSheet
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +53,10 @@ internal fun HomeScreen(
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+
+
+    val addCardSheetState = rememberModalBottomSheetState()
+    var addCardShowBottomSheet by remember { mutableStateOf(false) }
 
     val context = LocalPlatformContext.current
     val dao = remember {
@@ -76,24 +73,33 @@ internal fun HomeScreen(
             sheetState = sheetState
         )
     }
+
+    if (addCardShowBottomSheet) {
+        AddCardBottomSheet(
+            setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
+            sheetState = addCardSheetState
+        )
+    }
     val hazeState = rememberHazeState()
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
 
         item {
             Box {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "WebP Image",
-                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
-                        .hazeSource(hazeState)
-                )
+//                AsyncImage(
+//                    model = ImageRequest.Builder(LocalPlatformContext.current)
+//                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
+//                        .crossfade(true)
+//                        .build(),
+//                    contentDescription = "WebP Image",
+//                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
+//                        .hazeSource(hazeState)
+//                )
                 CardPager(
                     cards = listOf(),
                     modifier = Modifier.padding(bottom = 8.dp),
-                    hazeState
+                    hazeState = hazeState,
+                    addCardShowBottomSheet = addCardShowBottomSheet,
+                    setAddCardShowBottomSheet = { addCardShowBottomSheet = it }
                 )
             }
         }
@@ -160,5 +166,6 @@ internal fun HomeScreen(
         }
     }
 }
+
 
 

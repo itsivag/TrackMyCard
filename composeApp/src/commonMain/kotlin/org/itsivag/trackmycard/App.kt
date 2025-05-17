@@ -27,8 +27,6 @@ expect fun isSystemInDarkTheme(): Boolean
 @Composable
 fun App() {
     val isDarkTheme = isSystemInDarkTheme()
-    val scope = rememberCoroutineScope()
-    var text by remember { mutableStateOf("Loading") }
     val navController = rememberNavController()
 
 
