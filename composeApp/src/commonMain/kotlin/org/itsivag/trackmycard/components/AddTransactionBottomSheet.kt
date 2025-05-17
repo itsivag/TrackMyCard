@@ -1,33 +1,29 @@
 package org.itsivag.trackmycard.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,12 +42,14 @@ import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import com.itsivag.transactions.data.getTransactionsDatabase
 import com.itsivag.transactions.model.TransactionDataModel
+import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.focusedColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
+import org.koin.compose.viewmodel.koinViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -60,7 +58,8 @@ import java.util.Locale
 @Composable
 fun AddTransactionBottomSheet(
     setShowBottomSheet: (Boolean) -> Unit,
-    sheetState: SheetState
+    sheetState: SheetState,
+    upsertTransaction: (TransactionDataModel) -> Unit
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
@@ -71,10 +70,7 @@ fun AddTransactionBottomSheet(
 
     val datePickerState = rememberDatePickerState()
     val scope = rememberCoroutineScope()
-    val context = LocalPlatformContext.current
-    val dao = remember {
-        getTransactionsDatabase(context).transactionsDao()
-    }
+
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -199,7 +195,7 @@ fun AddTransactionBottomSheet(
 
             scope.launch {
                 try {
-                    dao.upsertTransaction(
+                    upsertTransaction(
                         TransactionDataModel(
                             title = title,
                             description = description,
@@ -213,6 +209,20 @@ fun AddTransactionBottomSheet(
                             id = 0 // Room will auto-generate this
                         )
                     )
+//                    viewModel.upsertTransaction(
+//                        TransactionDataModel(
+//                            title = title,
+//                            description = description,
+//                            amount = amountValue,
+//                            dateTime = SimpleDateFormat(
+//                                "yyyy-MM-dd'T'HH:mm:ss",
+//                                Locale.getDefault()
+//                            )
+//                                .format(Date(selectedDate!!)),
+//                            category = "General",
+//                            id = 0 // Room will auto-generate this
+//                        )
+//                    )
                     setShowBottomSheet(false)
                 } catch (e: Exception) {
                     errorMessage = "Failed to save transaction: ${e.message}"

@@ -16,6 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.LocalPlatformContext
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
@@ -39,16 +39,21 @@ import org.itsivag.trackmycard.components.CardPager
 import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
-import androidx.compose.runtime.collectAsState
-import com.itsivag.transactions.data.getTransactionsDatabase
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.itsivag.cards.viewmodel.CardsViewModel
+import com.itsivag.transactions.viewmodel.TransactionsViewModel
+import com.itsivag.transactions.viewmodel.UIState
 import dev.chrisbanes.haze.rememberHazeState
 import org.itsivag.trackmycard.components.AddCardBottomSheet
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeScreen(
     paddingValues: PaddingValues,
     navigateToTransactionsScreen: () -> Unit,
+    transactionViewModel: TransactionsViewModel = koinViewModel<TransactionsViewModel>(),
+    cardViewModel: CardsViewModel = koinViewModel<CardsViewModel>()
 ) {
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -58,11 +63,8 @@ internal fun HomeScreen(
     val addCardSheetState = rememberModalBottomSheetState()
     var addCardShowBottomSheet by remember { mutableStateOf(false) }
 
-    val context = LocalPlatformContext.current
-    val dao = remember {
-        getTransactionsDatabase(context).transactionsDao()
-    }
-    val transactions by dao.getAllTransactions().collectAsState(initial = emptyList())
+    val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
+    val transactions by transactionViewModel.transactionState.collectAsStateWithLifecycle()
 
     val config = LocalWindowInfo.current
     val height = rememberSaveable { config.containerSize.height }
@@ -70,14 +72,16 @@ internal fun HomeScreen(
     if (showBottomSheet) {
         AddTransactionBottomSheet(
             setShowBottomSheet = { showBottomSheet = it },
-            sheetState = sheetState
+            sheetState = sheetState,
+            upsertTransaction = { transactionViewModel.upsertTransaction(it) }
         )
     }
 
     if (addCardShowBottomSheet) {
         AddCardBottomSheet(
             setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
-            sheetState = addCardSheetState
+            sheetState = addCardSheetState,
+            upsertCard = { cardViewModel.upsertCard(it) }
         )
     }
     val hazeState = rememberHazeState()
@@ -94,13 +98,27 @@ internal fun HomeScreen(
 //                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
 //                        .hazeSource(hazeState)
 //                )
-                CardPager(
-                    cards = listOf(),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    hazeState = hazeState,
-                    addCardShowBottomSheet = addCardShowBottomSheet,
-                    setAddCardShowBottomSheet = { addCardShowBottomSheet = it }
-                )
+                when (cards) {
+                    is com.itsivag.cards.viewmodel.UIState.Error -> {
+                        Text("Error getting your cards!")
+                    }
+
+                    com.itsivag.cards.viewmodel.UIState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+
+                    is com.itsivag.cards.viewmodel.UIState.Success -> {
+                        val card =
+                            (cards as com.itsivag.cards.viewmodel.UIState.Success).cardDataModel
+                        CardPager(
+                            cards = card ?: emptyList(),
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            hazeState = hazeState,
+                            addCardShowBottomSheet = addCardShowBottomSheet,
+                            setAddCardShowBottomSheet = { addCardShowBottomSheet = it }
+                        )
+                    }
+                }
             }
         }
         item {
@@ -155,14 +173,31 @@ internal fun HomeScreen(
             }
         }
 
-        items(transactions.size.coerceAtMost(5)) { index ->
-            val transaction = transactions[index]
-            TransactionListItem(
-                title = transaction.title,
-                description = transaction.description,
-                amount = transaction.amount,
-                dateTime = transaction.dateTime
-            )
+        when (transactions) {
+            is UIState.Error -> {
+                item {
+                    Text("Error Getting your transactions!")
+                }
+            }
+
+            UIState.Loading -> {
+                item {
+                    CircularProgressIndicator()
+                }
+            }
+
+            is UIState.Success -> {
+                val t = (transactions as UIState.Success).transactionDataModel
+                items(t?.size?.coerceAtMost(5) ?: 0) { index ->
+                    val transaction = t?.get(index)
+                    TransactionListItem(
+                        title = transaction?.title ?: "",
+                        description = transaction?.description ?: "",
+                        amount = transaction?.amount ?: 0.0,
+                        dateTime = transaction?.dateTime ?: ""
+                    )
+                }
+            }
         }
     }
 }

@@ -1,10 +1,16 @@
 package com.itsivag.cards.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Entity(tableName = "cards")
 data class CardDataModel(
+    @SerialName("id")
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
     @SerialName("metadata")
     val metadata: Metadata,
     @SerialName("card")

@@ -38,6 +38,8 @@ kotlin {
 //            ktor
             implementation(libs.ktor.client.okhttp)
             implementation(project(":cards"))
+//            koin
+            implementation(libs.koin.android)
         }
         commonMain.dependencies {
             implementation(project(":helper"))

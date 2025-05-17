@@ -1,10 +1,9 @@
 package org.itsivag.trackmycard
 
-import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
-import platform.UIKit.UIApplication
+import org.itsivag.trackmycard.di.initKoin
 
-fun MainViewController() = ComposeUIViewController {
-    val dao = remember { getTransactionsDatabase(UIApplication.sharedApplication).transactionsDao() }
+fun MainViewController() = ComposeUIViewController(configure = { initKoin() }) {
+//    val dao = remember { getTransactionsDatabase(UIApplication.sharedApplication).transactionsDao() }
     App()
 }

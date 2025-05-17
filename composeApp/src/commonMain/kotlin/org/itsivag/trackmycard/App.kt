@@ -19,9 +19,11 @@ import org.itsivag.trackmycard.navigation.TrackMyCardNavHostController
 import org.itsivag.trackmycard.theme.TrackMyCardTheme
 import org.koin.compose.KoinContext
 import org.koin.core.context.startKoin
+import org.koin.dsl.KoinAppDeclaration
 
 @Composable
 expect fun isSystemInDarkTheme(): Boolean
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,15 +31,8 @@ fun App() {
     val isDarkTheme = isSystemInDarkTheme()
     val navController = rememberNavController()
 
-
-    startKoin {
-        modules(cardsModule)
-    }
-
     TrackMyCardTheme(darkTheme = isDarkTheme) {
         KoinContext {
-
-
             Scaffold(
                 contentWindowInsets = WindowInsets(0, 0, 0, 0),
                 topBar = {

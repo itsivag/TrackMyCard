@@ -2,7 +2,6 @@ package org.itsivag.trackmycard.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -10,7 +9,6 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,16 +21,22 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.OnestFontFamily
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.surfaceColor
-import kotlin.math.exp
+import trackmycard.composeapp.generated.resources.Res
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddCardBottomSheet(setAddCardShowBottomSheet: (Boolean) -> Unit, sheetState: SheetState) {
+fun AddCardBottomSheet(
+    setAddCardShowBottomSheet: (Boolean) -> Unit,
+    sheetState: SheetState,
+    upsertCard: (String) -> Unit
+) {
     var cardIssuer by rememberSaveable { mutableStateOf("") }
     var cardNetwork by rememberSaveable { mutableStateOf("") }
+    var cardName by rememberSaveable { mutableStateOf("") }
 
     ModalBottomSheet(
         containerColor = surfaceColor,
@@ -67,7 +71,17 @@ fun AddCardBottomSheet(setAddCardShowBottomSheet: (Boolean) -> Unit, sheetState:
             modifier = Modifier
         )
 
+        MyDropDown(
+            label = "Card Name",
+            options = listOf("Neo", "My Zone"),
+            value = cardName,
+            setOnValueChange = { cardName = it },
+            modifier = Modifier
+        )
+
         TrackMyCardPrimaryButton(text = "Add Card") {
+            upsertCard(cardName)
+            setAddCardShowBottomSheet(false)
         }
     }
 }

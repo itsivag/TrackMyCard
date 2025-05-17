@@ -1,19 +1,17 @@
-package com.itsivag.cards.data
+package com.itsivag.cards.data.remote
 
 import com.itsivag.cards.model.CardDataModel
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
 
 interface CardsRemoteDataService {
-    suspend fun getCard(name: String): CardDataModel
+    suspend fun getCardByName(name: String): CardDataModel
 }
 
 class CardsRemoteDataServiceImpl(private val client: HttpClient) : CardsRemoteDataService {
-    override suspend fun getCard(name: String): CardDataModel {
+    override suspend fun getCardByName(name: String): CardDataModel {
         val response =
             client.get("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/flipkart_axis.json")
 

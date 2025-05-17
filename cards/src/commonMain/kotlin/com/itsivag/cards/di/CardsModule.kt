@@ -1,30 +1,34 @@
 package com.itsivag.cards.di
 
-import com.itsivag.cards.data.CardsRemoteDataService
-import com.itsivag.cards.data.CardsRemoteDataServiceImpl
+import com.itsivag.cards.data.local.CardsLocalDataService
+import com.itsivag.cards.data.local.CardsLocalDataServiceImpl
+import com.itsivag.cards.data.remote.CardsRemoteDataService
+import com.itsivag.cards.data.remote.CardsRemoteDataServiceImpl
 import com.itsivag.cards.repo.CardsRepo
 import com.itsivag.cards.repo.CardsRepoImpl
 import com.itsivag.cards.util.httpClientWithLogger
 import com.itsivag.cards.viewmodel.CardsViewModel
+import org.koin.core.module.Module
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
+
+expect val cardsPlatformModule: Module
 
 val cardsModule = module {
     // HTTP Client
     single { httpClientWithLogger }
 
     // Data Services
-    single<CardsRemoteDataService> {
-        CardsRemoteDataServiceImpl(client = get())
-    }
+    singleOf(::CardsRemoteDataServiceImpl).bind<CardsRemoteDataService>()
+    singleOf(::CardsLocalDataServiceImpl).bind<CardsLocalDataService>()
+
 
     // Repositories
-    single<CardsRepo> {
-        CardsRepoImpl(cardsRemoteDataService = get())
-    }
+    singleOf(::CardsRepoImpl).bind<CardsRepo>()
 
     // ViewModels
-    viewModel {
-        CardsViewModel(cardsRepo = get())
-    }
+    viewModelOf(::CardsViewModel)
 } 
