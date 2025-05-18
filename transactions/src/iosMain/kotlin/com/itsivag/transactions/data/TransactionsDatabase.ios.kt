@@ -9,6 +9,7 @@ actual fun getTransactionsDatabase(context: Any): TransactionsDatabase {
     return Room.databaseBuilder<TransactionsDatabase>(
         name = dbFile,
         factory = { TransactionsDatabase::class.instantiateImpl() })
+        .fallbackToDestructiveMigration(false)
         .setDriver(BundledSQLiteDriver())
         .build()
 }

@@ -1,7 +1,11 @@
 package org.itsivag.trackmycard.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,12 +36,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.LocalPlatformContext
+import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
 import com.itsivag.transactions.data.getTransactionsDatabase
@@ -49,6 +55,7 @@ import org.itsivag.trackmycard.theme.focusedColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
+import org.itsivag.trackmycard.utils.CardNetworkImageMapper
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import trackmycard.composeapp.generated.resources.Res
@@ -62,7 +69,8 @@ import java.util.Locale
 fun AddTransactionBottomSheet(
     setShowBottomSheet: (Boolean) -> Unit,
     sheetState: SheetState,
-    upsertTransaction: (TransactionDataModel) -> Unit
+    upsertTransaction: (TransactionDataModel) -> Unit,
+    currentCard: CardDataModel?
 ) {
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
@@ -102,12 +110,13 @@ fun AddTransactionBottomSheet(
         sheetState = sheetState
     ) {
         Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
             text = "Add Transaction",
             fontFamily = OnestFontFamily(),
             fontWeight = FontWeight.SemiBold,
             fontSize = 24.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
         )
+
         TrackMyCardTextInputField(label = "Title", value = title) { value -> title = value }
         TrackMyCardTextInputField(
             label = "Description", value = description, singleLine = false
@@ -160,6 +169,13 @@ fun AddTransactionBottomSheet(
             )
         }
 
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.End
+        ) {
+            MiniCreditCard(currentCard)
+        }
+
         TrackMyCardPrimaryButton(text = "Add Transaction") {
             if (title.isBlank()) {
                 errorMessage = "Title cannot be empty"
@@ -184,36 +200,50 @@ fun AddTransactionBottomSheet(
 
             scope.launch {
                 try {
-                    upsertTransaction(
-                        TransactionDataModel(
-                            title = title,
-                            description = description,
-                            amount = amountValue,
-                            dateTime = SimpleDateFormat(
-                                "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
-                            ).format(Date(selectedDate!!)),
-                            category = "General",
-                            id = 0 // Room will auto-generate this
+                    currentCard?.card?.let {
+                        upsertTransaction(
+                            TransactionDataModel(
+                                title = title,
+                                description = description,
+                                amount = amountValue,
+                                dateTime = SimpleDateFormat(
+                                    "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+                                ).format(Date(selectedDate!!)),
+                                category = "General",
+                                id = 0,
+                                cardId = it.id
+                            )
                         )
-                    )
-//                    viewModel.upsertTransaction(
-//                        TransactionDataModel(
-//                            title = title,
-//                            description = description,
-//                            amount = amountValue,
-//                            dateTime = SimpleDateFormat(
-//                                "yyyy-MM-dd'T'HH:mm:ss",
-//                                Locale.getDefault()
-//                            )
-//                                .format(Date(selectedDate!!)),
-//                            category = "General",
-//                            id = 0 // Room will auto-generate this
-//                        )
-//                    )
+                    }
                     setShowBottomSheet(false)
                 } catch (e: Exception) {
                     errorMessage = "Failed to save transaction: ${e.message}"
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun MiniCreditCard(card: CardDataModel?) {
+    Box(
+        modifier = Modifier.background(
+            color = Color(card?.presentation?.decoration?.primaryColor ?: 255255255),
+            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
+        )
+    ) {
+        Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+                card?.card?.cardName ?: "",
+                fontFamily = DmSansFontFamily(),
+                fontWeight = FontWeight.Medium
+            )
+            CardNetworkImageMapper(card?.card?.networkType ?: "")?.let {
+                Image(
+                    modifier = Modifier.height(16.dp),
+                    painter = it,
+                    contentDescription = it.toString()
+                )
             }
         }
     }

@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +20,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,22 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
-import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.itsivag.trackmycard.components.CardPager
 import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import com.itsivag.cards.model.CardDataModel
 import com.itsivag.cards.viewmodel.CardsViewModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import com.itsivag.transactions.viewmodel.UIState
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
+import io.github.aakira.napier.Napier
 import org.itsivag.trackmycard.components.AddCardBottomSheet
+import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,21 +62,38 @@ internal fun HomeScreen(
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
-
     val addCardSheetState = rememberModalBottomSheetState()
     var addCardShowBottomSheet by remember { mutableStateOf(false) }
 
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionState.collectAsStateWithLifecycle()
 
+    var currentCard by rememberSaveable { mutableStateOf<CardDataModel?>(null) }
+
     val config = LocalWindowInfo.current
     val height = rememberSaveable { config.containerSize.height }
+
+    // Debug logging
+    LaunchedEffect(currentCard) {
+        Napier.v { "Current Card: ${currentCard?.card?.cardName ?: "No Card Selected"}" }
+    }
+
+    // Initialize current card when cards are loaded
+    LaunchedEffect(cards) {
+        if (cards is com.itsivag.cards.viewmodel.UIState.Success) {
+            val cardList = (cards as com.itsivag.cards.viewmodel.UIState.Success).cardDataModel
+            if (cardList?.isNotEmpty() == true && currentCard == null) {
+                currentCard = cardList[0]
+            }
+        }
+    }
 
     if (showBottomSheet) {
         AddTransactionBottomSheet(
             setShowBottomSheet = { showBottomSheet = it },
             sheetState = sheetState,
-            upsertTransaction = { transactionViewModel.upsertTransaction(it) }
+            upsertTransaction = { transactionViewModel.upsertTransaction(it) },
+            currentCard = currentCard
         )
     }
 
@@ -93,18 +106,17 @@ internal fun HomeScreen(
     }
     val hazeState = rememberHazeState()
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
-
         item {
             Box {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "WebP Image",
-                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
-                        .hazeSource(hazeState)
-                )
+//                AsyncImage(
+//                    model = ImageRequest.Builder(LocalPlatformContext.current)
+//                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
+//                        .crossfade(true)
+//                        .build(),
+//                    contentDescription = "WebP Image",
+//                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
+//                        .hazeSource(hazeState)
+//                )
                 when (cards) {
                     is com.itsivag.cards.viewmodel.UIState.Error -> {
                         Text("Error getting your cards!")
@@ -121,14 +133,15 @@ internal fun HomeScreen(
                             cards = card ?: emptyList(),
                             modifier = Modifier.padding(bottom = 8.dp),
                             hazeState = hazeState,
-                            setAddCardShowBottomSheet = { addCardShowBottomSheet = it }
+                            setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
+                            setCurrentCard = { currentCard = it }
                         )
                     }
                 }
             }
         }
         item {
-            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Row(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)) {
                 OutlinedButton(
                     onClick = {
                         showBottomSheet = true

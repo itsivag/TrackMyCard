@@ -9,7 +9,6 @@ import kotlinx.serialization.Serializable
 @Entity(tableName = "transactions")
 @Serializable
 data class TransactionDataModel(
-
     @SerialName("id")
     @PrimaryKey(autoGenerate = true)
     val id: Int,
@@ -23,4 +22,6 @@ data class TransactionDataModel(
     val dateTime: String,
     @SerialName("amount")
     val amount: Double,
+    @SerialName("cardId")
+    val cardId: String
 )

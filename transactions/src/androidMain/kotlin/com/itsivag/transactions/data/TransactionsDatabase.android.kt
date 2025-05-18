@@ -11,5 +11,5 @@ actual fun getTransactionsDatabase(context: Any): TransactionsDatabase {
         androidContext.applicationContext,
         TransactionsDatabase::class.java,
         name = dbFile.absolutePath,
-    ).setDriver(BundledSQLiteDriver()).build()
+    ).fallbackToDestructiveMigration(false).setDriver(BundledSQLiteDriver()).build()
 }

@@ -32,6 +32,7 @@ import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
+import org.itsivag.trackmycard.utils.CardNetworkImageMapper
 import org.jetbrains.compose.resources.painterResource
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.amex
@@ -137,10 +138,10 @@ fun CreditCard(
 //                            fontWeight = FontWeight.Medium
 //                        )
 //                    }
-                    cardNetworkImageMapper(card.card.networkType)?.let {
+                    CardNetworkImageMapper(card.card.networkType)?.let {
                         Image(
                             painter = it,
-                            contentDescription = card.card.networkType
+                            contentDescription = it.toString()
                         )
                     }
                 }
@@ -167,13 +168,4 @@ enum class CardNetwork(val network: String) {
     AMEX("amex")
 }
 
-@Composable
-private fun cardNetworkImageMapper(network: String): Painter? =
-    when (network.lowercase().trim()) {
-        CardNetwork.VISA.network -> painterResource(Res.drawable.visa)
-        CardNetwork.MASTERCARD.network -> painterResource(Res.drawable.mastercard)
-        CardNetwork.AMEX.network -> painterResource(Res.drawable.amex)
-        else -> {
-            null
-        }
-    }
+

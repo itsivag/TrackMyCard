@@ -77,6 +77,8 @@ kotlin {
 //            haze - blur
             implementation(libs.haze)
             implementation(libs.haze.materials)
+            //log
+            implementation(libs.napier)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
