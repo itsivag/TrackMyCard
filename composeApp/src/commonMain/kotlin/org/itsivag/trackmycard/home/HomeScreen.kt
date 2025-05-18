@@ -66,12 +66,14 @@ internal fun HomeScreen(
     var addCardShowBottomSheet by remember { mutableStateOf(false) }
 
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
+    val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionState.collectAsStateWithLifecycle()
 
     var currentCard by rememberSaveable { mutableStateOf<CardDataModel?>(null) }
 
     val config = LocalWindowInfo.current
     val height = rememberSaveable { config.containerSize.height }
+
 
     // Debug logging
     LaunchedEffect(currentCard) {
@@ -80,8 +82,9 @@ internal fun HomeScreen(
 
     // Initialize current card when cards are loaded
     LaunchedEffect(cards) {
-        if (cards is com.itsivag.cards.viewmodel.UIState.Success) {
-            val cardList = (cards as com.itsivag.cards.viewmodel.UIState.Success).cardDataModel
+        if (cards is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success) {
+            val cardList =
+                (cards as com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success).cardDataModel
             if (cardList?.isNotEmpty() == true && currentCard == null) {
                 currentCard = cardList[0]
             }
@@ -101,7 +104,8 @@ internal fun HomeScreen(
         AddCardBottomSheet(
             setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
             sheetState = addCardSheetState,
-            upsertCard = { cardViewModel.upsertCard(it) }
+            upsertCard = { cardViewModel.upsertCard(it) },
+            cardMapperList = cardMapper
         )
     }
     val hazeState = rememberHazeState()
@@ -118,17 +122,17 @@ internal fun HomeScreen(
 //                        .hazeSource(hazeState)
 //                )
                 when (cards) {
-                    is com.itsivag.cards.viewmodel.UIState.Error -> {
+                    is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Error -> {
                         Text("Error getting your cards!")
                     }
 
-                    com.itsivag.cards.viewmodel.UIState.Loading -> {
+                    com.itsivag.cards.viewmodel.UserCreatedCardUIState.Loading -> {
                         CircularProgressIndicator()
                     }
 
-                    is com.itsivag.cards.viewmodel.UIState.Success -> {
+                    is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success -> {
                         val card =
-                            (cards as com.itsivag.cards.viewmodel.UIState.Success).cardDataModel
+                            (cards as com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success).cardDataModel
                         CardPager(
                             cards = card ?: emptyList(),
                             modifier = Modifier.padding(bottom = 8.dp),

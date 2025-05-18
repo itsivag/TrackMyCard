@@ -3,13 +3,15 @@ package com.itsivag.cards.repo
 import com.itsivag.cards.data.local.CardsLocalDataService
 import com.itsivag.cards.data.remote.CardsRemoteDataService
 import com.itsivag.cards.model.CardDataModel
+import com.itsivag.cards.model.CardMapperDataModel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 
 interface CardsRepo {
     suspend fun upsertCard(card: CardDataModel): Result<Boolean>
-    suspend fun getAllCards(): Result<Flow<List<CardDataModel>>>
+    suspend fun getAllUserCreatedCards(): Result<Flow<List<CardDataModel>>>
     suspend fun getCardByName(name: String): Result<CardDataModel>
+    suspend fun getCardMapper(): Result<CardMapperDataModel>
 }
 
 class CardsRepoImpl(
@@ -26,6 +28,15 @@ class CardsRepoImpl(
         }
     }
 
+    override suspend fun getCardMapper(): Result<CardMapperDataModel> {
+        try {
+            return Result.success(cardsRemoteDataService.getCardMapper())
+        } catch (e: Exception) {
+            Napier.v { e.toString() }
+            return Result.failure(e)
+        }
+    }
+
     override suspend fun upsertCard(card: CardDataModel): Result<Boolean> {
         try {
             cardsLocalDataService.upsertCard(card)
@@ -36,7 +47,7 @@ class CardsRepoImpl(
         }
     }
 
-    override suspend fun getAllCards(): Result<Flow<List<CardDataModel>>> {
+    override suspend fun getAllUserCreatedCards(): Result<Flow<List<CardDataModel>>> {
         try {
             val cards = cardsLocalDataService.getAllCards()
             return Result.success(cards)

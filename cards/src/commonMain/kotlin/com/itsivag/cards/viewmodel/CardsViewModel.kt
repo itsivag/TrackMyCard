@@ -3,8 +3,8 @@ package com.itsivag.cards.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.itsivag.cards.model.CardDataModel
+import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.cards.repo.CardsRepo
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,32 +13,37 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
-    private val _cardState = MutableStateFlow<UIState>(UIState.Loading)
-    val cardState: StateFlow<UIState> = _cardState.asStateFlow()
+    private val _cardState =
+        MutableStateFlow<UserCreatedCardUIState>(UserCreatedCardUIState.Loading)
+    val cardState: StateFlow<UserCreatedCardUIState> = _cardState.asStateFlow()
+
+    private val _cardMapperState =
+        MutableStateFlow<CardMapperDataModel?>(null)
+    val cardMapperState: StateFlow<CardMapperDataModel?> = _cardMapperState.asStateFlow()
 
     init {
-        getAllCards()
+        getUserCreatedCards()
+        getCardMapper()
     }
 
-    fun getAllCards() {
+    fun getUserCreatedCards() {
         viewModelScope.launch(Dispatchers.IO) {
-            val res = cardsRepo.getAllCards()
+            val res = cardsRepo.getAllUserCreatedCards()
 
             res.onSuccess {
                 it.collect {
-                    _cardState.value = UIState.Success(it)
+                    _cardState.value = UserCreatedCardUIState.Success(it)
                 }
             }
 
             res.onFailure {
-                _cardState.value = UIState.Error(it.message ?: "Error getting card")
+                _cardState.value = UserCreatedCardUIState.Error(it.message ?: "Error getting card")
 
             }
         }
     }
 
     suspend fun getCardByName(name: String) = cardsRepo.getCardByName(name)
-
     fun upsertCard(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val card = getCardByName(name)
@@ -47,10 +52,19 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
             }
         }
     }
+
+    fun getCardMapper() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = cardsRepo.getCardMapper()
+            res.onSuccess {
+                _cardMapperState.value = it
+            }
+        }
+    }
 }
 
-sealed class UIState {
-    data class Success(val cardDataModel: List<CardDataModel>?) : UIState()
-    data class Error(val message: String) : UIState()
-    data object Loading : UIState()
+sealed class UserCreatedCardUIState {
+    data class Success(val cardDataModel: List<CardDataModel>?) : UserCreatedCardUIState()
+    data class Error(val message: String) : UserCreatedCardUIState()
+    data object Loading : UserCreatedCardUIState()
 }

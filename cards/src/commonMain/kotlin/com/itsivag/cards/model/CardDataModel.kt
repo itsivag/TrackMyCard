@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 data class CardDataModel(
     @PrimaryKey
     @SerialName("id")
-    val id: Int,
+    val id: String,
     @SerialName("card")
     val card: Card,
     @SerialName("presentation")

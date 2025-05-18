@@ -200,21 +200,19 @@ fun AddTransactionBottomSheet(
 
             scope.launch {
                 try {
-                    currentCard?.card?.let {
-                        upsertTransaction(
-                            TransactionDataModel(
-                                title = title,
-                                description = description,
-                                amount = amountValue,
-                                dateTime = SimpleDateFormat(
-                                    "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
-                                ).format(Date(selectedDate!!)),
-                                category = "General",
-                                id = 0,
-                                cardId = it.id
-                            )
+                    upsertTransaction(
+                        TransactionDataModel(
+                            title = title,
+                            description = description,
+                            amount = amountValue,
+                            dateTime = SimpleDateFormat(
+                                "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+                            ).format(Date(selectedDate!!)),
+                            category = "General",
+                            id = 0,
+                            cardId = currentCard?.id.toString()
                         )
-                    }
+                    )
                     setShowBottomSheet(false)
                 } catch (e: Exception) {
                     errorMessage = "Failed to save transaction: ${e.message}"
