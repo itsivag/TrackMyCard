@@ -6,17 +6,6 @@ import kotlinx.serialization.json.Json
 class CardDataModelConverters {
     private val json = Json { ignoreUnknownKeys = true }
 
-    // Metadata converters
-    @TypeConverter
-    fun fromMetadata(metadata: CardDataModel.Metadata): String {
-        return json.encodeToString(metadata)
-    }
-
-    @TypeConverter
-    fun toMetadata(value: String): CardDataModel.Metadata {
-        return json.decodeFromString(value)
-    }
-
     // Card converters
     @TypeConverter
     fun fromCard(card: CardDataModel.Card): String {

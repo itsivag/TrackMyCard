@@ -8,11 +8,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = "cards")
 data class CardDataModel(
+    @PrimaryKey
     @SerialName("id")
-    @PrimaryKey(autoGenerate = true)
     val id: Int,
-    @SerialName("metadata")
-    val metadata: Metadata,
     @SerialName("card")
     val card: Card,
     @SerialName("presentation")
@@ -35,19 +33,7 @@ data class CardDataModel(
     val changeLog: List<ChangeLog>
 ) {
     @Serializable
-    data class Metadata(
-        @SerialName("schemaVersion")
-        val schemaVersion: String,
-        @SerialName("lastUpdated")
-        val lastUpdated: String,
-        @SerialName("source")
-        val source: String
-    )
-
-    @Serializable
     data class Card(
-        @SerialName("id")
-        val id: String,
         @SerialName("cardName")
         val cardName: String,
         @SerialName("cardIssuer")
