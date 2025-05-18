@@ -49,7 +49,10 @@ import org.itsivag.trackmycard.theme.focusedColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import trackmycard.composeapp.generated.resources.Res
+import trackmycard.composeapp.generated.resources.calendar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,22 +76,18 @@ fun AddTransactionBottomSheet(
 
 
     if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                Button(onClick = {
-                    selectedDate = datePickerState.selectedDateMillis
-                    showDatePicker = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
+        DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
+            Button(onClick = {
+                selectedDate = datePickerState.selectedDateMillis
+                showDatePicker = false
+            }) {
+                Text("OK")
             }
-        ) {
+        }, dismissButton = {
+            Button(onClick = { showDatePicker = false }) {
+                Text("Cancel")
+            }
+        }) {
             DatePicker(state = datePickerState)
         }
     }
@@ -111,13 +110,10 @@ fun AddTransactionBottomSheet(
         )
         TrackMyCardTextInputField(label = "Title", value = title) { value -> title = value }
         TrackMyCardTextInputField(
-            label = "Description",
-            value = description,
-            singleLine = false
+            label = "Description", value = description, singleLine = false
         ) { value -> description = value }
         TrackMyCardTextInputField(
-            label = "Amount",
-            value = amount
+            label = "Amount", value = amount
         ) { value ->
             if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
                 amount = value
@@ -125,25 +121,20 @@ fun AddTransactionBottomSheet(
         }
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp).height(48.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
         ) {
             TrackMyCardTextInputField(
                 label = "Date",
                 value = selectedDate?.let {
-                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                        .format(Date(it))
+                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(it))
                 } ?: "",
                 readOnly = true,
-                modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 8.dp)
-            ) {
+                modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 8.dp)) {
                 showDatePicker = true
             }
             Box(
-                modifier = Modifier
-                    .padding(start = 8.dp).size(48.dp),
+                modifier = Modifier.padding(start = 8.dp).size(48.dp),
                 contentAlignment = androidx.compose.ui.Alignment.Center
             ) {
                 IconButton(
@@ -151,13 +142,13 @@ fun AddTransactionBottomSheet(
                         containerColor = backgroundColor
                     ),
                     onClick = { showDatePicker = true },
-                    modifier = Modifier
-                        .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
+                    modifier = Modifier.border(1.dp, primaryColor, RoundedCornerShape(16.dp))
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Call,
+                        painter = painterResource(Res.drawable.calendar),
                         contentDescription = "Select Date",
                         tint = primaryColor,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -165,9 +156,7 @@ fun AddTransactionBottomSheet(
 
         errorMessage?.let {
             Text(
-                text = it,
-                color = Color.Red,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                text = it, color = Color.Red, modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
 
@@ -201,10 +190,8 @@ fun AddTransactionBottomSheet(
                             description = description,
                             amount = amountValue,
                             dateTime = SimpleDateFormat(
-                                "yyyy-MM-dd'T'HH:mm:ss",
-                                Locale.getDefault()
-                            )
-                                .format(Date(selectedDate!!)),
+                                "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+                            ).format(Date(selectedDate!!)),
                             category = "General",
                             id = 0 // Room will auto-generate this
                         )
