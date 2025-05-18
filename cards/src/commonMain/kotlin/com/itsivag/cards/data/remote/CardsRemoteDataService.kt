@@ -13,7 +13,7 @@ interface CardsRemoteDataService {
 class CardsRemoteDataServiceImpl(private val client: HttpClient) : CardsRemoteDataService {
     override suspend fun getCardByName(name: String): CardDataModel {
         val response =
-            client.get("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/flipkart_axis.json")
+            client.get("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/refs/heads/main/flipkart_axis.json")
 
         // For text/plain responses, we need to get the text and parse it manually
         val text = response.body<String>()

@@ -1,6 +1,7 @@
 package org.itsivag.trackmycard.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,7 +25,7 @@ import org.itsivag.trackmycard.theme.onBackgroundColor
 @Composable
 fun AddCardButton(modifier: Modifier, setAddCardShowBottomSheet: (Boolean) -> Unit) {
     OutlinedButton(
-        modifier = modifier.fillMaxWidth().padding(16.dp).height(200.dp),
+        modifier = modifier.fillMaxSize(),
         onClick = {
             setAddCardShowBottomSheet(true)
         },
@@ -33,7 +34,7 @@ fun AddCardButton(modifier: Modifier, setAddCardShowBottomSheet: (Boolean) -> Un
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Icon(
                 Icons.Default.Add,

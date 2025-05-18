@@ -45,32 +45,17 @@ fun CreditCard(
         )
     )
     Column(
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
             .border(brush = gradientBrush, width = 1.dp, shape = RoundedCornerShape(16.dp))
-
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
+            modifier = Modifier.weight(1f)
                 .clip(RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp))
                 .hazeEffect(
                     state = hazeState,
                     style = hazeStyle
                 ).padding(16.dp)
         ) {
-//            cardInfo.backgroundImage?.let { painter ->
-//                Image(
-//                    painter = painter,
-//                    contentDescription = null,
-//                    modifier = Modifier
-//                        .fillMaxSize(),
-////                        .padding((-16).dp),
-//                    contentScale = ContentScale.Fit,
-//                    alpha = cardInfo.backgroundImageAlpha
-//                )
-//            }
-
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceBetween

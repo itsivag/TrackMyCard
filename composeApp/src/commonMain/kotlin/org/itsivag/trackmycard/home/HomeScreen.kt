@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,9 +42,14 @@ import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.itsivag.cards.viewmodel.CardsViewModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import com.itsivag.transactions.viewmodel.UIState
+import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,15 +96,15 @@ internal fun HomeScreen(
 
         item {
             Box {
-//                AsyncImage(
-//                    model = ImageRequest.Builder(LocalPlatformContext.current)
-//                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = "WebP Image",
-//                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
-//                        .hazeSource(hazeState)
-//                )
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalPlatformContext.current)
+                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "WebP Image",
+                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
+                        .hazeSource(hazeState)
+                )
                 when (cards) {
                     is com.itsivag.cards.viewmodel.UIState.Error -> {
                         Text("Error getting your cards!")
@@ -114,7 +121,6 @@ internal fun HomeScreen(
                             cards = card ?: emptyList(),
                             modifier = Modifier.padding(bottom = 8.dp),
                             hazeState = hazeState,
-                            addCardShowBottomSheet = addCardShowBottomSheet,
                             setAddCardShowBottomSheet = { addCardShowBottomSheet = it }
                         )
                     }

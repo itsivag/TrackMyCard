@@ -3,7 +3,9 @@ package org.itsivag.trackmycard.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -22,22 +24,18 @@ fun CardPager(
     modifier: Modifier = Modifier,
     hazeState: HazeState,
     setAddCardShowBottomSheet: (Boolean) -> Unit,
-    addCardShowBottomSheet: Boolean
 ) {
-    val pagerState = rememberPagerState { cards.size }
+    val pagerState = rememberPagerState { cards.size + 1 }
     val width = LocalWindowInfo.current.containerSize.width
-
-    cards.ifEmpty {
-        AddCardButton(modifier,setAddCardShowBottomSheet)
-    }
+    val height = LocalWindowInfo.current.containerSize.height
 
     HorizontalPager(
         state = pagerState,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().height((height * 0.085f).dp),
         contentPadding = PaddingValues(start = (width * 0.02f).dp, end = (width * 0.02f).dp)
     ) { page ->
         if (page == cards.size) {
-            Box(modifier.background(color = primaryColor).size(34.dp))
+            AddCardButton(modifier) { setAddCardShowBottomSheet(it) }
         } else {
             CreditCard(
                 card = cards[page],
@@ -47,4 +45,5 @@ fun CardPager(
         }
     }
 }
+
 
