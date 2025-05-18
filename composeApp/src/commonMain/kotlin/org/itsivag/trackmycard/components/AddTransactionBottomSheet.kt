@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -31,24 +29,21 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.LocalPlatformContext
 import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
-import com.itsivag.transactions.data.getTransactionsDatabase
 import com.itsivag.transactions.model.TransactionDataModel
-import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.focusedColor
@@ -57,7 +52,6 @@ import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
 import org.itsivag.trackmycard.utils.CardNetworkImageMapper
 import org.jetbrains.compose.resources.painterResource
-import org.koin.compose.viewmodel.koinViewModel
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.calendar
 import java.text.SimpleDateFormat
@@ -76,26 +70,35 @@ fun AddTransactionBottomSheet(
     var description by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Store formatted date string directly
+    var formattedDate by rememberSaveable { mutableStateOf("") }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     var selectedDate by rememberSaveable { mutableStateOf<Long?>(null) }
-
     val datePickerState = rememberDatePickerState()
     val scope = rememberCoroutineScope()
 
-
     if (showDatePicker) {
-        DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
-            Button(onClick = {
-                selectedDate = datePickerState.selectedDateMillis
-                showDatePicker = false
-            }) {
-                Text("OK")
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                Button(onClick = {
+                    datePickerState.selectedDateMillis?.let { timestamp ->
+                        selectedDate = timestamp
+                        formattedDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+                            .format(Date(timestamp))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
             }
-        }, dismissButton = {
-            Button(onClick = { showDatePicker = false }) {
-                Text("Cancel")
-            }
-        }) {
+        ) {
             DatePicker(state = datePickerState)
         }
     }
@@ -117,12 +120,24 @@ fun AddTransactionBottomSheet(
             fontSize = 24.sp,
         )
 
-        TrackMyCardTextInputField(label = "Title", value = title) { value -> title = value }
         TrackMyCardTextInputField(
-            label = "Description", value = description, singleLine = false
-        ) { value -> description = value }
+            label = "Title",
+            value = title
+        ) { value ->
+            title = value
+        }
+
         TrackMyCardTextInputField(
-            label = "Amount", value = amount
+            label = "Description",
+            value = description,
+            singleLine = false
+        ) { value ->
+            description = value
+        }
+
+        TrackMyCardTextInputField(
+            label = "Amount",
+            value = amount
         ) { value ->
             if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
                 amount = value
@@ -130,53 +145,63 @@ fun AddTransactionBottomSheet(
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp).height(48.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth(),
+//                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             TrackMyCardTextInputField(
                 label = "Date",
-                value = selectedDate?.let {
-                    SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(Date(it))
-                } ?: "",
+                value = formattedDate,
                 readOnly = true,
-                modifier = Modifier.weight(1f).fillMaxHeight().padding(end = 8.dp)) {
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
+                // Click on the text field will open date picker
                 showDatePicker = true
             }
-            Box(
-                modifier = Modifier.padding(start = 8.dp).size(48.dp),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = backgroundColor
+                ),
+                onClick = { showDatePicker = true },
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(48.dp)
+                    .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
             ) {
-                IconButton(
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = backgroundColor
-                    ),
-                    onClick = { showDatePicker = true },
-                    modifier = Modifier.border(1.dp, primaryColor, RoundedCornerShape(16.dp))
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.calendar),
-                        contentDescription = "Select Date",
-                        tint = primaryColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                Icon(
+                    painter = painterResource(Res.drawable.calendar),
+                    contentDescription = "Select Date",
+                    tint = primaryColor,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
 
         errorMessage?.let {
             Text(
-                text = it, color = Color.Red, modifier = Modifier.padding(horizontal = 16.dp)
+                text = it,
+                color = Color.Red,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.End
         ) {
             MiniCreditCard(currentCard)
         }
 
-        TrackMyCardPrimaryButton(text = "Add Transaction") {
+        TrackMyCardPrimaryButton(
+            text = "Add Transaction",
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+        ) {
             if (title.isBlank()) {
                 errorMessage = "Title cannot be empty"
                 return@TrackMyCardPrimaryButton
@@ -254,9 +279,11 @@ internal fun TrackMyCardTextInputField(
     singleLine: Boolean = true,
     readOnly: Boolean = false,
     modifier: Modifier = Modifier,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange: (String) -> Unit
 ) {
     OutlinedTextField(
+        keyboardOptions = keyboardOptions,
         singleLine = singleLine,
         value = value,
         onValueChange = { newValue ->
@@ -287,6 +314,8 @@ internal fun TrackMyCardTextInputField(
         supportingText = {
             if (singleLine && !readOnly) {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End,
                     text = "${value.length}/50",
                     color = Color.White.copy(alpha = 0.7f),
                     fontFamily = DmSansFontFamily(),
@@ -294,7 +323,8 @@ internal fun TrackMyCardTextInputField(
                 )
             }
         },
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     )
 }
-
