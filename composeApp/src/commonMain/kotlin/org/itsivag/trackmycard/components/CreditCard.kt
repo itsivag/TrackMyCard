@@ -45,11 +45,14 @@ fun CreditCard(
         )
     )
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
             .border(brush = gradientBrush, width = 1.dp, shape = RoundedCornerShape(16.dp))
+
     ) {
         Box(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
                 .clip(RoundedCornerShape(topEnd = 16.dp, topStart = 16.dp))
                 .hazeEffect(
                     state = hazeState,
