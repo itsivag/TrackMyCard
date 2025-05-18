@@ -11,5 +11,6 @@ actual fun getCardsDatabase(context: Any): CardsDatabase {
         androidContext.applicationContext,
         CardsDatabase::class.java,
         name = dbFile.absolutePath,
-    ).setDriver(BundledSQLiteDriver()).build()
+    ).fallbackToDestructiveMigration(false)
+        .setDriver(BundledSQLiteDriver()).build()
 }

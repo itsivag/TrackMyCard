@@ -9,6 +9,7 @@ actual fun getCardsDatabase(context: Any): CardsDatabase {
     return Room.databaseBuilder<CardsDatabase>(
         name = dbFile,
         factory = { CardsDatabase::class.instantiateImpl() })
+        .fallbackToDestructiveMigration(false)
         .setDriver(BundledSQLiteDriver())
         .build()
 }
