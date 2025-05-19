@@ -18,7 +18,7 @@ import com.itsivag.helper.DmSansFontFamily
 fun TrackMyCardPrimaryButton(text: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().padding(16.dp),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
     ) {
         Text(

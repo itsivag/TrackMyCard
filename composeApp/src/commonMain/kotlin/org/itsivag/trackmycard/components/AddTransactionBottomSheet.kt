@@ -3,6 +3,7 @@ package org.itsivag.trackmycard.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -147,7 +148,6 @@ fun AddTransactionBottomSheet(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-//                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             TrackMyCardTextInputField(
@@ -158,7 +158,6 @@ fun AddTransactionBottomSheet(
                     .weight(1f)
                     .padding(end = 8.dp)
             ) {
-                // Click on the text field will open date picker
                 showDatePicker = true
             }
 
@@ -278,6 +277,7 @@ internal fun TrackMyCardTextInputField(
     value: String,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
+    showCharacterCount : Boolean = false,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange: (String) -> Unit
@@ -312,7 +312,7 @@ internal fun TrackMyCardTextInputField(
         ),
         placeholder = { Text("Enter $label") },
         supportingText = {
-            if (singleLine && !readOnly) {
+            if (singleLine && !readOnly && showCharacterCount) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End,
@@ -325,6 +325,5 @@ internal fun TrackMyCardTextInputField(
         },
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
     )
 }
