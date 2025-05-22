@@ -1,12 +1,10 @@
 package org.itsivag.trackmycard.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,13 +33,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.helper.OnestFontFamily
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.toLocalDateTime
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
@@ -49,9 +52,6 @@ import org.itsivag.trackmycard.theme.surfaceColor
 import org.jetbrains.compose.resources.painterResource
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.calendar
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +62,8 @@ fun AddCardBottomSheet(
     cardMapperList: CardMapperDataModel?
 ) {
     var cardName by rememberSaveable { mutableStateOf("") }
-    val availableCards = cardMapperList?.cards?.map { it.name }
+    var cardPath by rememberSaveable { mutableStateOf("") }
+    val availableCardListNames = cardMapperList?.cards?.map { it.name }
     var limitText by rememberSaveable { mutableStateOf("") }
     val limit: Double = limitText.toDoubleOrNull() ?: 0.0
 
@@ -78,8 +79,18 @@ fun AddCardBottomSheet(
                 Button(onClick = {
                     // Format the date when user confirms selection
                     datePickerState.selectedDateMillis?.let { timestamp ->
-                        cycle = SimpleDateFormat("dd", Locale.getDefault())
-                            .format(Date(timestamp))
+                        // Convert milliseconds to Instant
+                        val instant = Instant.fromEpochMilliseconds(timestamp)
+                        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                        val formatPattern = "dd-MM-yyyy"
+
+                        @OptIn(FormatStringsInDatetimeFormats::class)
+                        val dateTimeFormat = LocalDateTime.Format {
+                            byUnicodePattern(formatPattern)
+                        }
+
+                        cycle = dateTimeFormat.format(localDateTime)
+
                     }
                     showDatePicker = false
                 }) {
@@ -115,7 +126,7 @@ fun AddCardBottomSheet(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                availableCards?.let {
+                availableCardListNames?.let {
                     MyDropDown(
                         label = "Card Name",
                         options = it,

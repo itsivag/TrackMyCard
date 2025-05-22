@@ -79,6 +79,8 @@ kotlin {
             implementation(libs.haze.materials)
             //log
             implementation(libs.napier)
+            //date time
+            implementation(libs.kotlinx.datetime)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

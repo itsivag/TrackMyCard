@@ -43,12 +43,17 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
         }
     }
 
-    suspend fun getCardByName(name: String) = cardsRepo.getCardByName(name)
+    suspend fun getCardWithPath(path : String) = cardsRepo.getCardByPath(path)
+
     fun upsertCard(name: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            val card = getCardByName(name)
-            card.onSuccess {
+            val path = cardMapperState.value?.cards?.find { it.name == name }?.file
+            val card = path?.let { getCardWithPath(it) }
+            card?.onSuccess {
                 cardsRepo.upsertCard(it)
+            }
+            card?.onFailure {
+
             }
         }
     }

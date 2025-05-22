@@ -111,138 +111,141 @@ fun AddTransactionBottomSheet(
         onDismissRequest = {
             setShowBottomSheet(false)
         },
-        sheetState = sheetState
+        sheetState = sheetState,
     ) {
-        Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = "Add Transaction",
-            fontFamily = OnestFontFamily(),
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 24.sp,
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = "Add Transaction",
+                fontFamily = OnestFontFamily(),
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 24.sp,
+            )
 
-        TrackMyCardTextInputField(
-            label = "Title",
-            value = title
-        ) { value ->
-            title = value
-        }
-
-        TrackMyCardTextInputField(
-            label = "Description",
-            value = description,
-            singleLine = false
-        ) { value ->
-            description = value
-        }
-
-        TrackMyCardTextInputField(
-            label = "Amount",
-            value = amount
-        ) { value ->
-            if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
-                amount = value
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
             TrackMyCardTextInputField(
-                label = "Date",
-                value = formattedDate,
-                readOnly = true,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-            ) {
-                showDatePicker = true
+                label = "Title",
+                value = title,
+            ) { value ->
+                title = value
             }
 
-            IconButton(
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = backgroundColor
-                ),
-                onClick = { showDatePicker = true },
+            TrackMyCardTextInputField(
+                label = "Description",
+                value = description,
+                singleLine = false
+            ) { value ->
+                description = value
+            }
+
+            TrackMyCardTextInputField(
+                label = "Amount",
+                value = amount
+            ) { value ->
+                if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
+                    amount = value
+                }
+            }
+
+            Row(
                 modifier = Modifier
-                    .padding(end = 16.dp)
-                    .size(48.dp)
-                    .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(Res.drawable.calendar),
-                    contentDescription = "Select Date",
-                    tint = primaryColor,
-                    modifier = Modifier.size(24.dp)
+                TrackMyCardTextInputField(
+                    label = "Date",
+                    value = formattedDate,
+                    readOnly = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                ) {
+                    showDatePicker = true
+                }
+
+                IconButton(
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = backgroundColor
+                    ),
+                    onClick = { showDatePicker = true },
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(48.dp)
+                        .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.calendar),
+                        contentDescription = "Select Date",
+                        tint = primaryColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
-        }
 
-        errorMessage?.let {
-            Text(
-                text = it,
-                color = Color.Red,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-            MiniCreditCard(currentCard)
-        }
-
-        TrackMyCardPrimaryButton(
-            text = "Add Transaction",
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-        ) {
-            if (title.isBlank()) {
-                errorMessage = "Title cannot be empty"
-                return@TrackMyCardPrimaryButton
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                MiniCreditCard(currentCard)
             }
 
-            if (amount.isBlank()) {
-                errorMessage = "Amount cannot be empty"
-                return@TrackMyCardPrimaryButton
-            }
+            TrackMyCardPrimaryButton(
+                text = "Add Transaction",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            ) {
+                if (title.isBlank()) {
+                    errorMessage = "Title cannot be empty"
+                    return@TrackMyCardPrimaryButton
+                }
 
-            if (selectedDate == null) {
-                errorMessage = "Please select a date"
-                return@TrackMyCardPrimaryButton
-            }
+                if (amount.isBlank()) {
+                    errorMessage = "Amount cannot be empty"
+                    return@TrackMyCardPrimaryButton
+                }
 
-            val amountValue = amount.toDoubleOrNull()
-            if (amountValue == null || amountValue <= 0) {
-                errorMessage = "Please enter a valid amount"
-                return@TrackMyCardPrimaryButton
-            }
+                if (selectedDate == null) {
+                    errorMessage = "Please select a date"
+                    return@TrackMyCardPrimaryButton
+                }
 
-            scope.launch {
-                try {
-                    upsertTransaction(
-                        TransactionDataModel(
-                            title = title,
-                            description = description,
-                            amount = amountValue,
-                            dateTime = SimpleDateFormat(
-                                "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
-                            ).format(Date(selectedDate!!)),
-                            category = "General",
-                            id = 0,
-                            cardId = currentCard?.id.toString()
+                val amountValue = amount.toDoubleOrNull()
+                if (amountValue == null || amountValue <= 0) {
+                    errorMessage = "Please enter a valid amount"
+                    return@TrackMyCardPrimaryButton
+                }
+
+                scope.launch {
+                    try {
+                        upsertTransaction(
+                            TransactionDataModel(
+                                title = title,
+                                description = description,
+                                amount = amountValue,
+                                dateTime = SimpleDateFormat(
+                                    "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
+                                ).format(Date(selectedDate!!)),
+                                category = "General",
+                                id = 0,
+                                cardId = currentCard?.id.toString()
+                            )
                         )
-                    )
-                    setShowBottomSheet(false)
-                } catch (e: Exception) {
-                    errorMessage = "Failed to save transaction: ${e.message}"
+                        setShowBottomSheet(false)
+                    } catch (e: Exception) {
+                        errorMessage = "Failed to save transaction: ${e.message}"
+                    }
                 }
             }
         }
+
     }
 }
 
@@ -277,7 +280,7 @@ internal fun TrackMyCardTextInputField(
     value: String,
     singleLine: Boolean = true,
     readOnly: Boolean = false,
-    showCharacterCount : Boolean = false,
+    showCharacterCount: Boolean = false,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange: (String) -> Unit
