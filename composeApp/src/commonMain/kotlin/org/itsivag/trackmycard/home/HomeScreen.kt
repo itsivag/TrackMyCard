@@ -58,11 +58,11 @@ internal fun HomeScreen(
     transactionViewModel: TransactionsViewModel = koinViewModel<TransactionsViewModel>(),
     cardViewModel: CardsViewModel = koinViewModel<CardsViewModel>()
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val addTransactionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
-    val addCardSheetState = rememberModalBottomSheetState()
+    val addCardSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var addCardShowBottomSheet by remember { mutableStateOf(false) }
 
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
@@ -94,7 +94,7 @@ internal fun HomeScreen(
     if (showBottomSheet) {
         AddTransactionBottomSheet(
             setShowBottomSheet = { showBottomSheet = it },
-            sheetState = sheetState,
+            sheetState = addTransactionSheetState,
             upsertTransaction = { transactionViewModel.upsertTransaction(it) },
             currentCard = currentCard
         )

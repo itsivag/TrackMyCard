@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,16 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.helper.OnestFontFamily
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format.FormatStringsInDatetimeFormats
-import kotlinx.datetime.format.byUnicodePattern
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
+import org.itsivag.trackmycard.utils.formatDateTime
 import org.jetbrains.compose.resources.painterResource
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.calendar
@@ -61,13 +58,13 @@ fun AddCardBottomSheet(
     upsertCard: (String) -> Unit,
     cardMapperList: CardMapperDataModel?
 ) {
+    val scope = rememberCoroutineScope()
     var cardName by rememberSaveable { mutableStateOf("") }
     var cardPath by rememberSaveable { mutableStateOf("") }
     val availableCardListNames = cardMapperList?.cards?.map { it.name }
     var limitText by rememberSaveable { mutableStateOf("") }
     val limit: Double = limitText.toDoubleOrNull() ?: 0.0
 
-    // Store formatted date string directly
     var cycle by rememberSaveable { mutableStateOf("") }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -77,20 +74,12 @@ fun AddCardBottomSheet(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 Button(onClick = {
-                    // Format the date when user confirms selection
                     datePickerState.selectedDateMillis?.let { timestamp ->
-                        // Convert milliseconds to Instant
-                        val instant = Instant.fromEpochMilliseconds(timestamp)
-                        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                        val formatPattern = "dd-MM-yyyy"
-
-                        @OptIn(FormatStringsInDatetimeFormats::class)
-                        val dateTimeFormat = LocalDateTime.Format {
-                            byUnicodePattern(formatPattern)
+                        scope.launch {
+                            formatDateTime(timestamp = timestamp, format = "dd")?.let {
+                                cycle = it
+                            }
                         }
-
-                        cycle = dateTimeFormat.format(localDateTime)
-
                     }
                     showDatePicker = false
                 }) {

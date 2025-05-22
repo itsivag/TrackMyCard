@@ -3,7 +3,6 @@ package org.itsivag.trackmycard.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,12 +11,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Chip
+import androidx.compose.material.ChipDefaults
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FilterChip
+import androidx.compose.material.SelectableChipColors
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -49,17 +55,18 @@ import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.focusedColor
 import org.itsivag.trackmycard.theme.onBackgroundColor
+import org.itsivag.trackmycard.theme.onPrimaryColor
 import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
 import org.itsivag.trackmycard.utils.CardNetworkImageMapper
+import org.itsivag.trackmycard.utils.formatDateTime
+import org.itsivag.trackmycard.utils.safeConvertToDouble
 import org.jetbrains.compose.resources.painterResource
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.calendar
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun AddTransactionBottomSheet(
     setShowBottomSheet: (Boolean) -> Unit,
@@ -67,17 +74,21 @@ fun AddTransactionBottomSheet(
     upsertTransaction: (TransactionDataModel) -> Unit,
     currentCard: CardDataModel?
 ) {
+
+
+    val scope = rememberCoroutineScope()
+
     var title by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
-    var amount by rememberSaveable { mutableStateOf("") }
-    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
-
-    // Store formatted date string directly
-    var formattedDate by rememberSaveable { mutableStateOf("") }
+    var amount by rememberSaveable { mutableStateOf(0.0) }
+    var transactionDate by rememberSaveable { mutableStateOf("") }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
-    var selectedDate by rememberSaveable { mutableStateOf<Long?>(null) }
     val datePickerState = rememberDatePickerState()
-    val scope = rememberCoroutineScope()
+
+    var selectedChip by rememberSaveable { mutableStateOf<Int?>(null) }
+    val chipList by lazy {
+        listOf("General", "Food", "Transport", "Entertainment", "Bills", "Other")
+    }
 
     if (showDatePicker) {
         DatePickerDialog(
@@ -85,9 +96,9 @@ fun AddTransactionBottomSheet(
             confirmButton = {
                 Button(onClick = {
                     datePickerState.selectedDateMillis?.let { timestamp ->
-                        selectedDate = timestamp
-                        formattedDate = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                            .format(Date(timestamp))
+                        formatDateTime(timestamp = timestamp, format = "dd-MM-yyyy")?.let {
+                            transactionDate = it
+                        }
                     }
                     showDatePicker = false
                 }) {
@@ -113,220 +124,131 @@ fun AddTransactionBottomSheet(
         },
         sheetState = sheetState,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = "Add Transaction",
-                fontFamily = OnestFontFamily(),
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 24.sp,
-            )
 
+        Text(
+            modifier = Modifier.padding(16.dp),
+            text = "Add Transaction",
+            fontFamily = OnestFontFamily(),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 24.sp,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            MiniCreditCard(currentCard)
+        }
+
+        TrackMyCardTextInputField(
+            label = "Title",
+            value = title,
+            modifier = Modifier.padding(16.dp)
+        ) { value ->
+            title = value
+        }
+
+        TrackMyCardTextInputField(
+            label = "Description",
+            value = description,
+            singleLine = false,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) { value ->
+            description = value
+        }
+
+        TrackMyCardTextInputField(
+            label = "Amount",
+            value = if (amount == 0.0) "" else amount.toString(),
+            modifier = Modifier.padding(16.dp)
+        ) { value ->
+            amount = value.safeConvertToDouble()
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth().padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             TrackMyCardTextInputField(
-                label = "Title",
-                value = title,
-            ) { value ->
-                title = value
-            }
-
-            TrackMyCardTextInputField(
-                label = "Description",
-                value = description,
-                singleLine = false
-            ) { value ->
-                description = value
-            }
-
-            TrackMyCardTextInputField(
-                label = "Amount",
-                value = amount
-            ) { value ->
-                if (value.isEmpty() || value.matches(Regex("^\\d*\\.?\\d*$"))) {
-                    amount = value
-                }
-            }
-
-            Row(
+                label = "Date",
+                value = transactionDate,
+                readOnly = true,
                 modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                    .weight(1f)
+                    .padding(end = 8.dp)
             ) {
-                TrackMyCardTextInputField(
-                    label = "Date",
-                    value = formattedDate,
-                    readOnly = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                ) {
-                    showDatePicker = true
-                }
+                showDatePicker = true
+            }
 
-                IconButton(
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = backgroundColor
-                    ),
-                    onClick = { showDatePicker = true },
-                    modifier = Modifier
-                        .padding(end = 16.dp)
-                        .size(48.dp)
-                        .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
+            IconButton(
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = backgroundColor
+                ),
+                onClick = { showDatePicker = true },
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(48.dp)
+                    .border(1.dp, primaryColor, RoundedCornerShape(16.dp))
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.calendar),
+                    contentDescription = "Select Date",
+                    tint = primaryColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        LazyRow(modifier = Modifier.padding(16.dp)) {
+            items(chipList.size) {
+                val isSelected = selectedChip == it
+                FilterChip(
+                    selected = isSelected,
+                    onClick = {
+                        selectedChip = it
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ChipDefaults.filterChipColors(
+                        backgroundColor = if (isSelected) primaryColor else backgroundColor,
+                    )
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.calendar),
-                        contentDescription = "Select Date",
-                        tint = primaryColor,
-                        modifier = Modifier.size(24.dp)
+                    Text(
+                        chipList[it],
+                        modifier = Modifier.padding(8.dp),
+                        style = TextStyle(
+                            fontFamily = DmSansFontFamily(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = if (isSelected) onPrimaryColor else Color.White
+
                     )
                 }
             }
-
-            errorMessage?.let {
-                Text(
-                    text = it,
-                    color = Color.Red,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                MiniCreditCard(currentCard)
-            }
-
-            TrackMyCardPrimaryButton(
-                text = "Add Transaction",
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
-            ) {
-                if (title.isBlank()) {
-                    errorMessage = "Title cannot be empty"
-                    return@TrackMyCardPrimaryButton
-                }
-
-                if (amount.isBlank()) {
-                    errorMessage = "Amount cannot be empty"
-                    return@TrackMyCardPrimaryButton
-                }
-
-                if (selectedDate == null) {
-                    errorMessage = "Please select a date"
-                    return@TrackMyCardPrimaryButton
-                }
-
-                val amountValue = amount.toDoubleOrNull()
-                if (amountValue == null || amountValue <= 0) {
-                    errorMessage = "Please enter a valid amount"
-                    return@TrackMyCardPrimaryButton
-                }
-
-                scope.launch {
-                    try {
-                        upsertTransaction(
-                            TransactionDataModel(
-                                title = title,
-                                description = description,
-                                amount = amountValue,
-                                dateTime = SimpleDateFormat(
-                                    "yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()
-                                ).format(Date(selectedDate!!)),
-                                category = "General",
-                                id = 0,
-                                cardId = currentCard?.id.toString()
-                            )
+        }
+        TrackMyCardPrimaryButton(
+            text = "Add Transaction",
+            modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
+            scope.launch {
+                currentCard?.let {
+                    upsertTransaction(
+                        TransactionDataModel(
+                            title = title,
+                            description = description,
+                            amount = amount,
+                            dateTime = transactionDate,
+                            category = "General",
+                            id = 0,
+                            cardId = it.id
                         )
-                        setShowBottomSheet(false)
-                    } catch (e: Exception) {
-                        errorMessage = "Failed to save transaction: ${e.message}"
-                    }
+                    )
                 }
+                setShowBottomSheet(false)
             }
         }
 
     }
-}
-
-@Composable
-fun MiniCreditCard(card: CardDataModel?) {
-    Box(
-        modifier = Modifier.background(
-            color = Color(card?.presentation?.decoration?.primaryColor ?: 255255255),
-            shape = RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp)
-        )
-    ) {
-        Column(modifier = Modifier.padding(8.dp)) {
-            Text(
-                card?.card?.cardName ?: "",
-                fontFamily = DmSansFontFamily(),
-                fontWeight = FontWeight.Medium
-            )
-            CardNetworkImageMapper(card?.card?.networkType ?: "")?.let {
-                Image(
-                    modifier = Modifier.height(16.dp),
-                    painter = it,
-                    contentDescription = it.toString()
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun TrackMyCardTextInputField(
-    label: String,
-    value: String,
-    singleLine: Boolean = true,
-    readOnly: Boolean = false,
-    showCharacterCount: Boolean = false,
-    modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    onValueChange: (String) -> Unit
-) {
-    OutlinedTextField(
-        keyboardOptions = keyboardOptions,
-        singleLine = singleLine,
-        value = value,
-        onValueChange = { newValue ->
-            if (singleLine && newValue.length <= 50) {
-                onValueChange(newValue)
-            } else if (!singleLine) {
-                onValueChange(newValue)
-            }
-        },
-        readOnly = readOnly,
-        label = { Text(label, color = Color.White, fontFamily = DmSansFontFamily()) },
-        shape = RoundedCornerShape(16.dp),
-        textStyle = TextStyle(
-            color = Color.White,
-            fontSize = 20.sp,
-            fontFamily = DmSansFontFamily(),
-            fontWeight = FontWeight.Medium
-        ),
-        maxLines = if (singleLine) 1 else 3,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = primaryColor,
-            unfocusedBorderColor = Color.Transparent,
-            focusedContainerColor = focusedColor,
-            unfocusedContainerColor = backgroundColor,
-            cursorColor = primaryColor
-        ),
-        placeholder = { Text("Enter $label") },
-        supportingText = {
-            if (singleLine && !readOnly && showCharacterCount) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End,
-                    text = "${value.length}/50",
-                    color = Color.White.copy(alpha = 0.7f),
-                    fontFamily = DmSansFontFamily(),
-                    fontSize = 12.sp
-                )
-            }
-        },
-        modifier = modifier
-            .fillMaxWidth()
-    )
 }
