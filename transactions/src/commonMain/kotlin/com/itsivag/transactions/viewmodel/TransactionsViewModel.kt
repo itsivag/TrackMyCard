@@ -19,6 +19,11 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
     val transactionStateWithCardFilter: StateFlow<UIState> =
         _transactionStateWithCardFilter.asStateFlow()
 
+    private val _upsertTransactionState =
+        MutableStateFlow<UpsertTransactionUIState>(UpsertTransactionUIState.Loading)
+    val upsertTransactionState: StateFlow<UpsertTransactionUIState> =
+        _upsertTransactionState.asStateFlow()
+
     init {
         getAllTransactions()
     }
@@ -61,7 +66,15 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
 
     fun upsertTransaction(transaction: TransactionDataModel) {
         viewModelScope.launch(Dispatchers.IO) {
-            transactionsRepo.upsertTransaction(transaction)
+            val res = transactionsRepo.upsertTransaction(transaction)
+            res.onSuccess {
+                _upsertTransactionState.value = UpsertTransactionUIState.Success(transaction)
+            }
+
+            res.onFailure {
+                _upsertTransactionState.value =
+                    UpsertTransactionUIState.Error(it.message ?: "Error adding transaction")
+            }
         }
     }
 }
@@ -70,4 +83,10 @@ sealed class UIState {
     data class Success(val transactionDataModel: List<TransactionDataModel>?) : UIState()
     data class Error(val message: String) : UIState()
     data object Loading : UIState()
+}
+
+sealed class UpsertTransactionUIState {
+    data class Success(val transactionDataModel: TransactionDataModel) : UpsertTransactionUIState()
+    data class Error(val message: String) : UpsertTransactionUIState()
+    data object Loading : UpsertTransactionUIState()
 }

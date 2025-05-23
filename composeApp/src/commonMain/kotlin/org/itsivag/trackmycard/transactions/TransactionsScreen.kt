@@ -45,7 +45,7 @@ internal fun TransactionsScreen(
     Column(
         modifier = Modifier.statusBarsPadding().padding(padding)
     ) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = navigateBack) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
             }

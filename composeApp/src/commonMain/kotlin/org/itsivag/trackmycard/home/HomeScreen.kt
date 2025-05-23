@@ -24,12 +24,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,7 +45,6 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
-import org.itsivag.trackmycard.navigation.NavigationRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,6 +63,7 @@ internal fun HomeScreen(
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
     val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
+    val upsertTransactionState by transactionViewModel.upsertTransactionState.collectAsStateWithLifecycle()
 
     var currentCard by remember { mutableStateOf<CardDataModel?>(null) }
 
@@ -90,7 +87,8 @@ internal fun HomeScreen(
             setShowBottomSheet = { showBottomSheet = it },
             sheetState = addTransactionSheetState,
             upsertTransaction = { transactionViewModel.upsertTransaction(it) },
-            currentCard = currentCard
+            currentCard = currentCard,
+            upsertTransactionState = upsertTransactionState
         )
     }
 

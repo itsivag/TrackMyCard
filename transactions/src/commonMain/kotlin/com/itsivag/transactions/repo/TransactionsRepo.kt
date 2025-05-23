@@ -15,10 +15,11 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
     TransactionsRepo {
     override suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean> {
         try {
+            validateTransaction(transaction)
             transactionsLocalDataService.upsertTransaction(transaction)
             return Result.success(true)
         } catch (e: Exception) {
-            Napier.e("Error upsetting transaction", e)
+            Napier.e("Error upserting transaction", e)
             return Result.failure(e)
         }
     }
@@ -35,6 +36,9 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
 
     override suspend fun getTransactionsWithCardFilter(cardId: String): Result<Flow<List<TransactionDataModel>>> {
         try {
+            if (cardId.isBlank()) {
+                throw IllegalArgumentException("Card ID cannot be empty")
+            }
             val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
             return Result.success(res)
         } catch (e: Exception) {
@@ -43,4 +47,18 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
         }
     }
 
+    private fun validateTransaction(transaction: TransactionDataModel) {
+        with(transaction) {
+            when {
+                cardId.isBlank() -> throw IllegalArgumentException("Card not found")
+                title.isBlank() -> throw IllegalArgumentException("Title cannot be empty")
+                title.length > 50 -> throw IllegalArgumentException("Title cannot be longer than 50 characters")
+                description.length > 100 -> throw IllegalArgumentException("Description cannot be longer than 100 characters")
+                amount == 0.0 -> throw IllegalArgumentException("Amount cannot be zero")
+                amount < 0 -> throw IllegalArgumentException("Amount cannot be negative")
+                amount > 1_000_000_000 -> throw IllegalArgumentException("Amount exceeds maximum limit")
+                dateTime.isBlank() -> throw IllegalArgumentException("Date cannot be empty")
+            }
+        }
+    }
 }
