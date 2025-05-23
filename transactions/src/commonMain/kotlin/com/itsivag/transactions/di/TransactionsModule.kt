@@ -1,6 +1,6 @@
 package com.itsivag.transactions.di
 
-import com.itsivag.transactions.data.TransactionsDao
+import com.itsivag.models.transaction.dao.TransactionsDao
 import com.itsivag.transactions.data.TransactionsLocalDataService
 import com.itsivag.transactions.data.TransactionsLocalDataServiceImpl
 import com.itsivag.transactions.repo.TransactionsRepo

@@ -2,8 +2,8 @@ package com.itsivag.cards.repo
 
 import com.itsivag.cards.data.local.CardsLocalDataService
 import com.itsivag.cards.data.remote.CardsRemoteDataService
-import com.itsivag.cards.model.CardDataModel
-import com.itsivag.cards.model.CardMapperDataModel
+import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.card.CardMapperDataModel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.io.files.Path

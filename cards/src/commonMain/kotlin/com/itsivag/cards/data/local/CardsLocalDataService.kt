@@ -1,6 +1,7 @@
 package com.itsivag.cards.data.local
 
-import com.itsivag.cards.model.CardDataModel
+import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.card.dao.CardsDao
 import kotlinx.coroutines.flow.Flow
 
 interface CardsLocalDataService {

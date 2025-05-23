@@ -1,12 +1,13 @@
 package com.itsivag.transactions.di
 
-import com.itsivag.transactions.data.TransactionsDao
-import com.itsivag.transactions.data.getTransactionsDatabase
+import com.itsivag.models.db.TrackMyCardDatabase
+import com.itsivag.models.db.getTrackMyCardDatabase
+import com.itsivag.models.transaction.dao.TransactionsDao
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
 actual val transactionPlatformModule = module {
-    single { getTransactionsDatabase(androidContext()) }
+    single { getTrackMyCardDatabase(androidContext()) }
 
-    single<TransactionsDao> { get<com.itsivag.transactions.data.TransactionsDatabase>().transactionsDao() }
+    single<TransactionsDao> { get<TrackMyCardDatabase>().transactionsDao() }
 }

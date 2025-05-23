@@ -40,8 +40,8 @@ import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.itsivag.cards.model.CardDataModel
 import com.itsivag.cards.viewmodel.CardsViewModel
+import com.itsivag.models.card.CardDataModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import com.itsivag.transactions.viewmodel.UIState
 import dev.chrisbanes.haze.rememberHazeState

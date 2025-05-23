@@ -1,10 +1,10 @@
-package com.itsivag.transactions.data
+package com.itsivag.models.transaction.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.itsivag.transactions.model.TransactionDataModel
+import com.itsivag.models.transaction.TransactionDataModel
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,4 +17,7 @@ interface TransactionsDao {
 
     @Delete
     suspend fun deleteTransaction(transaction: TransactionDataModel)
+
+    @Query("SELECT * FROM transactions WHERE cardId = :cardId")
+    fun getTransactionsWithCardFilter(cardId: String): Flow<List<TransactionDataModel>>
 }

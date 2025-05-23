@@ -1,4 +1,4 @@
-package com.itsivag.cards.model
+package com.itsivag.models.card
 
 import androidx.room.TypeConverter
 import kotlinx.serialization.json.Json

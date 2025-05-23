@@ -2,7 +2,7 @@ package com.itsivag.transactions.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itsivag.transactions.model.TransactionDataModel
+import com.itsivag.models.transaction.TransactionDataModel
 import com.itsivag.transactions.repo.TransactionsRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -15,11 +15,15 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
     private val _transactionState = MutableStateFlow<UIState>(UIState.Loading)
     val transactionState: StateFlow<UIState> = _transactionState.asStateFlow()
 
+    private val _transactionStateWithCardFilter = MutableStateFlow<UIState>(UIState.Loading)
+    val transactionStateWithCardFilter: StateFlow<UIState> =
+        _transactionStateWithCardFilter.asStateFlow()
+
     init {
-        getTransactions()
+        getAllTransactions()
     }
 
-    fun getTransactions() {
+    fun getAllTransactions() {
         viewModelScope.launch(Dispatchers.IO) {
             val res = transactionsRepo.getTransactions()
             res.onSuccess {
@@ -30,6 +34,23 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
             res.onFailure {
                 _transactionState.value = UIState.Error(it.message ?: "Error getting transactions")
             }
+        }
+    }
+
+    fun getTransactionsWithCardFilter(cardId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = transactionsRepo.getTransactionsWithCardFilter(cardId)
+            res.onSuccess {
+                it.collect {
+                    _transactionStateWithCardFilter.value = UIState.Success(it)
+                }
+            }
+
+            res.onFailure {
+                _transactionStateWithCardFilter.value =
+                    UIState.Error(it.message ?: "Error getting transactions")
+            }
+
         }
     }
 

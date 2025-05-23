@@ -1,11 +1,11 @@
 package com.itsivag.cards.data.remote
 
-import com.itsivag.cards.model.CardDataModel
-import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.cards.util.BASE_URL
 import com.itsivag.cards.util.BASE_URL_WITH_COUNTRY_CODE
 import com.itsivag.cards.util.COUNTRY_CODE
 import com.itsivag.cards.util.MAPPER_URL
+import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.card.CardMapperDataModel
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get

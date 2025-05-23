@@ -2,9 +2,9 @@ package com.itsivag.cards.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.itsivag.cards.model.CardDataModel
-import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.cards.repo.CardsRepo
+import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.card.CardMapperDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow

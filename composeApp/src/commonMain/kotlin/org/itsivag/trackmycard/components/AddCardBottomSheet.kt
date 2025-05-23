@@ -38,8 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.itsivag.cards.model.CardMapperDataModel
 import com.itsivag.helper.OnestFontFamily
+import com.itsivag.models.card.CardMapperDataModel
 import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.onBackgroundColor

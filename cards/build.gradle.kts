@@ -30,6 +30,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":models"))
+            
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
 //            viewmodel

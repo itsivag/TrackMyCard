@@ -47,10 +47,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.DmSansFontFamily
 import com.itsivag.helper.OnestFontFamily
-import com.itsivag.transactions.model.TransactionDataModel
+import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.transaction.TransactionDataModel
 import kotlinx.coroutines.launch
 import org.itsivag.trackmycard.theme.backgroundColor
 import org.itsivag.trackmycard.theme.focusedColor

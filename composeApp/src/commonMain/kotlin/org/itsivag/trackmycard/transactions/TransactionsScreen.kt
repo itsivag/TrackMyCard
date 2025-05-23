@@ -14,16 +14,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.LocalPlatformContext
 import com.itsivag.helper.OnestFontFamily
-import com.itsivag.transactions.data.getTransactionsDatabase
 import org.itsivag.trackmycard.components.TransactionListItem
 
 @Composable
 internal fun TransactionsScreen(padding: PaddingValues) {
     val context = LocalPlatformContext.current
-    val dao = remember {
-        getTransactionsDatabase(context).transactionsDao()
-    }
-    val transactions by dao.getAllTransactions().collectAsState(initial = emptyList())
+
 
     LazyColumn(modifier = Modifier.padding(padding)) {
         item {
@@ -35,14 +31,14 @@ internal fun TransactionsScreen(padding: PaddingValues) {
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-        items(transactions.size) { index ->
-            val transaction = transactions[index]
-            TransactionListItem(
-                title = transaction.title,
-                description = transaction.description,
-                amount = transaction.amount,
-                dateTime = transaction.dateTime
-            )
-        }
+//        items(transactions.size) { index ->
+//            val transaction = transactions[index]
+//            TransactionListItem(
+//                title = transaction.title,
+//                description = transaction.description,
+//                amount = transaction.amount,
+//                dateTime = transaction.dateTime
+//            )
+//        }
     }
 }

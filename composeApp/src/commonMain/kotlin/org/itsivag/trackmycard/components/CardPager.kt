@@ -11,7 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import com.itsivag.cards.model.CardDataModel
+import com.itsivag.models.card.CardDataModel
 import dev.chrisbanes.haze.HazeState
 
 @Composable

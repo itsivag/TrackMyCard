@@ -45,6 +45,8 @@ kotlin {
             implementation(project(":helper"))
             implementation(project(":cards"))
             implementation(project(":transactions"))
+            implementation(project(":models"))
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material)

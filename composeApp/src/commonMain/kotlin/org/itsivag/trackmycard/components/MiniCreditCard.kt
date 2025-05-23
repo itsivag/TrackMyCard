@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.itsivag.cards.model.CardDataModel
 import com.itsivag.helper.DmSansFontFamily
+import com.itsivag.models.card.CardDataModel
 import org.itsivag.trackmycard.utils.CardNetworkImageMapper
 
 @Composable

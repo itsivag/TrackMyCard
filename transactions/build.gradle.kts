@@ -30,6 +30,8 @@ kotlin {
     }
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":models"))
+
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)
 //            viewmodel
@@ -40,14 +42,14 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
 
             //logger
-            implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.logging)
             implementation(libs.napier)
             //room
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
-
+            //serialization
+            implementation(libs.ktor.serialization.kotlinx.json)
         }
         androidMain.dependencies {
             implementation(libs.ktor.client.okhttp)
