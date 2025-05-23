@@ -37,20 +37,25 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
         }
     }
 
-    fun getTransactionsWithCardFilter(cardId: String) {
+    fun getTransactionsWithCardFilter(cardId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val res = transactionsRepo.getTransactionsWithCardFilter(cardId)
-            res.onSuccess {
-                it.collect {
-                    _transactionStateWithCardFilter.value = UIState.Success(it)
+            if (cardId == null || cardId.isEmpty()) {
+                _transactionStateWithCardFilter.value = UIState.Error("Invalid card id")
+                return@launch
+            } else {
+                val res = transactionsRepo.getTransactionsWithCardFilter(cardId)
+                res.onSuccess {
+                    it.collect {
+                        _transactionStateWithCardFilter.value = UIState.Success(it)
+                    }
                 }
-            }
 
-            res.onFailure {
-                _transactionStateWithCardFilter.value =
-                    UIState.Error(it.message ?: "Error getting transactions")
-            }
+                res.onFailure {
+                    _transactionStateWithCardFilter.value =
+                        UIState.Error(it.message ?: "Error getting transactions")
+                }
 
+            }
         }
     }
 

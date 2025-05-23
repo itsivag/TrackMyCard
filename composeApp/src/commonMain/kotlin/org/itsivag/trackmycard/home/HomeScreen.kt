@@ -45,7 +45,6 @@ import com.itsivag.models.card.CardDataModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import com.itsivag.transactions.viewmodel.UIState
 import dev.chrisbanes.haze.rememberHazeState
-import io.github.aakira.napier.Napier
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
@@ -67,7 +66,7 @@ internal fun HomeScreen(
 
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
     val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
-    val transactions by transactionViewModel.transactionState.collectAsStateWithLifecycle()
+    val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
 
     var currentCard by rememberSaveable { mutableStateOf<CardDataModel?>(null) }
 
@@ -77,7 +76,7 @@ internal fun HomeScreen(
 
     // Debug logging
     LaunchedEffect(currentCard) {
-        Napier.v { "Current Card: ${currentCard?.card?.cardName ?: "No Card Selected"}" }
+        transactionViewModel.getTransactionsWithCardFilter(currentCard?.id)
     }
 
     // Initialize current card when cards are loaded
