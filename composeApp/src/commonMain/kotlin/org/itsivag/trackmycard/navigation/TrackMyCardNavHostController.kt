@@ -10,13 +10,13 @@ import org.itsivag.trackmycard.transactions.TransactionsScreen
 
 @Composable
 fun TrackMyCardNavHostController(navController: NavHostController, padding: PaddingValues) {
-    NavHost(navController, startDestination = "home") {
-        composable("home") {
-            HomeScreen(padding, { navController.navigate("transactions") })
+    NavHost(navController, startDestination = NavigationRoutes.Home.route) {
+        composable(NavigationRoutes.Home.route) {
+            HomeScreen(padding, { navController.navigate(NavigationRoutes.Transactions.route) })
         }
 
-        composable("transactions") {
-            TransactionsScreen(padding)
+        composable(NavigationRoutes.Transactions.route) {
+            TransactionsScreen(padding = padding, navigateBack = { navController.popBackStack() })
         }
     }
 }

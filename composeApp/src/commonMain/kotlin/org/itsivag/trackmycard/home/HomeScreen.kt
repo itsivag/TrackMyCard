@@ -48,6 +48,7 @@ import dev.chrisbanes.haze.rememberHazeState
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
+import org.itsivag.trackmycard.navigation.NavigationRoutes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +59,6 @@ internal fun HomeScreen(
     cardViewModel: CardsViewModel = koinViewModel<CardsViewModel>()
 ) {
     val addTransactionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
 
     val addCardSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -68,18 +68,13 @@ internal fun HomeScreen(
     val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
 
-    var currentCard by rememberSaveable { mutableStateOf<CardDataModel?>(null) }
-
-    val config = LocalWindowInfo.current
-    val height = rememberSaveable { config.containerSize.height }
+    var currentCard by remember { mutableStateOf<CardDataModel?>(null) }
 
 
-    // Debug logging
     LaunchedEffect(currentCard) {
         transactionViewModel.getTransactionsWithCardFilter(currentCard?.id)
     }
 
-    // Initialize current card when cards are loaded
     LaunchedEffect(cards) {
         if (cards is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success) {
             val cardList =

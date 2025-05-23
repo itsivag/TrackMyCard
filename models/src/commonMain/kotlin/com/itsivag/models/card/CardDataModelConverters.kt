@@ -4,7 +4,7 @@ import androidx.room.TypeConverter
 import kotlinx.serialization.json.Json
 
 class CardDataModelConverters {
-    private val json = Json { ignoreUnknownKeys = true }
+    private val json = Json
 
     // Card converters
     @TypeConverter
