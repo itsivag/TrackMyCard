@@ -6,6 +6,10 @@ import com.itsivag.cards.data.remote.CardsRemoteDataService
 import com.itsivag.cards.data.remote.CardsRemoteDataServiceImpl
 import com.itsivag.cards.repo.CardsRepo
 import com.itsivag.cards.repo.CardsRepoImpl
+import com.itsivag.cards.usecase.GetAllUserCreatedCardsUseCase
+import com.itsivag.cards.usecase.GetCardByPathUseCase
+import com.itsivag.cards.usecase.GetCardMapperUseCase
+import com.itsivag.cards.usecase.UpsertCardUseCase
 import com.itsivag.cards.util.httpClientWithLogger
 import com.itsivag.cards.viewmodel.CardsViewModel
 import org.koin.core.module.Module
@@ -25,9 +29,14 @@ val cardsModule = module {
     singleOf(::CardsRemoteDataServiceImpl).bind<CardsRemoteDataService>()
     singleOf(::CardsLocalDataServiceImpl).bind<CardsLocalDataService>()
 
-
     // Repositories
     singleOf(::CardsRepoImpl).bind<CardsRepo>()
+
+    // Use Cases
+    singleOf(::GetCardMapperUseCase)
+    singleOf(::GetCardByPathUseCase)
+    singleOf(::UpsertCardUseCase)
+    singleOf(::GetAllUserCreatedCardsUseCase)
 
     // ViewModels
     viewModelOf(::CardsViewModel)
