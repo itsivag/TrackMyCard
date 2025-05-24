@@ -85,11 +85,6 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
             val res = transactionsRepo.upsertTransaction(transaction)
             res.onSuccess {
                 _upsertTransactionState.value = UpsertTransactionUIState.Success(transaction)
-                // Refresh both transaction lists
-                getAllTransactions()
-                if (transaction.cardId.isNotBlank()) {
-                    getTransactionsWithCardFilter(transaction.cardId)
-                }
                 // Reset state after a short delay to allow UI to process success
                 delay(100)
                 _upsertTransactionState.value = UpsertTransactionUIState.Idle
