@@ -1,0 +1,2 @@
+json_key_file("/Users/siva.1_ftc/fastlane_service_account/service_account.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("org.itsivag.trackmycard") # e.g. com.krausefx.app
