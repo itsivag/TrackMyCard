@@ -7,6 +7,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -26,6 +31,7 @@ internal fun TrackMyCardTextInputField(
     singleLine: Boolean = true,
     readOnly: Boolean = false,
     showCharacterCount: Boolean = false,
+    error: String? = null,
     modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     onValueChange: (String) -> Unit
@@ -52,15 +58,26 @@ internal fun TrackMyCardTextInputField(
         ),
         maxLines = if (singleLine) 1 else 3,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = primaryColor,
-            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = if (error != null) Color.Red else primaryColor,
+            unfocusedBorderColor = if (error != null) Color.Red else Color.Transparent,
             focusedContainerColor = focusedColor,
             unfocusedContainerColor = backgroundColor,
-            cursorColor = primaryColor
+            cursorColor = primaryColor,
+            errorBorderColor = Color.Red,
+            errorLabelColor = Color.Red,
+            errorSupportingTextColor = Color.Red,
+            errorCursorColor = Color.Red
         ),
         placeholder = { Text("Enter $label") },
         supportingText = {
-            if (singleLine && !readOnly && showCharacterCount) {
+            if (error != null) {
+                Text(
+                    text = error,
+                    color = Color.Red,
+                    fontFamily = DmSansFontFamily(),
+                    fontSize = 12.sp
+                )
+            } else if (singleLine && !readOnly && showCharacterCount) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End,
@@ -71,6 +88,7 @@ internal fun TrackMyCardTextInputField(
                 )
             }
         },
+        isError = error != null,
         modifier = modifier
             .fillMaxWidth()
     )

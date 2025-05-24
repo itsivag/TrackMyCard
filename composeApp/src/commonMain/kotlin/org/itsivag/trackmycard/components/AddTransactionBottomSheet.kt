@@ -51,6 +51,7 @@ import org.itsivag.trackmycard.theme.primaryColor
 import org.itsivag.trackmycard.theme.surfaceColor
 import org.itsivag.trackmycard.utils.formatDateTime
 import com.itsivag.helper.safeConvertToDouble
+import com.itsivag.transactions.error.TransactionError
 import org.jetbrains.compose.resources.painterResource
 import trackmycard.composeapp.generated.resources.Res
 import trackmycard.composeapp.generated.resources.calendar
@@ -63,10 +64,9 @@ fun AddTransactionBottomSheet(
     sheetState: SheetState,
     upsertTransaction: (TransactionDataModel) -> Unit,
     currentCard: CardDataModel?,
-    upsertTransactionState: UpsertTransactionUIState
+    upsertTransactionState: UpsertTransactionUIState,
+    clearErrorState: () -> Unit
 ) {
-
-
     val scope = rememberCoroutineScope()
 
     var title by rememberSaveable { mutableStateOf("") }
@@ -81,6 +81,31 @@ fun AddTransactionBottomSheet(
         listOf("General", "Food", "Transport", "Entertainment", "Bills", "Other")
     }
 
+    // Error states for each field
+    var titleError by rememberSaveable { mutableStateOf<String?>(null) }
+    var descriptionError by rememberSaveable { mutableStateOf<String?>(null) }
+    var amountError by rememberSaveable { mutableStateOf<String?>(null) }
+    var dateError by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Clear errors when any field changes
+    fun clearErrors() {
+        titleError = null
+        descriptionError = null
+        amountError = null
+        dateError = null
+        clearErrorState()
+    }
+
+    // Reset all states
+    fun resetStates() {
+        title = ""
+        description = ""
+        amount = 0.0
+        transactionDate = ""
+        selectedChip = null
+        clearErrors()
+    }
+
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
@@ -89,6 +114,7 @@ fun AddTransactionBottomSheet(
                     datePickerState.selectedDateMillis?.let { timestamp ->
                         formatDateTime(timestamp = timestamp, format = "dd-MM-yyyy")?.let {
                             transactionDate = it
+                            clearErrors()
                         }
                     }
                     showDatePicker = false
@@ -111,6 +137,7 @@ fun AddTransactionBottomSheet(
         contentColor = onBackgroundColor,
         shape = RoundedCornerShape(12.dp),
         onDismissRequest = {
+            resetStates()
             setShowBottomSheet(false)
         },
         sheetState = sheetState,
@@ -135,26 +162,32 @@ fun AddTransactionBottomSheet(
                 TrackMyCardTextInputField(
                     label = "Title",
                     value = title,
+                    error = titleError,
                     modifier = Modifier.padding(16.dp)
                 ) { value ->
                     title = value
+                    clearErrors()
                 }
 
                 TrackMyCardTextInputField(
                     label = "Description",
                     value = description,
+                    error = descriptionError,
                     singleLine = false,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) { value ->
                     description = value
+                    clearErrors()
                 }
 
                 TrackMyCardTextInputField(
                     label = "Amount",
                     value = if (amount == 0.0) "" else amount.toString(),
+                    error = amountError,
                     modifier = Modifier.padding(16.dp)
                 ) { value ->
                     amount = value.safeConvertToDouble()
+                    clearErrors()
                 }
 
                 Row(
@@ -165,19 +198,24 @@ fun AddTransactionBottomSheet(
                     TrackMyCardTextInputField(
                         label = "Date",
                         value = transactionDate,
+                        error = dateError,
                         readOnly = true,
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 8.dp)
                     ) {
                         showDatePicker = true
+                        clearErrors()
                     }
 
                     IconButton(
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = backgroundColor
                         ),
-                        onClick = { showDatePicker = true },
+                        onClick = { 
+                            showDatePicker = true
+                            clearErrors()
+                        },
                         modifier = Modifier
                             .padding(end = 16.dp)
                             .size(48.dp)
@@ -215,64 +253,77 @@ fun AddTransactionBottomSheet(
                                     fontWeight = FontWeight.SemiBold
                                 ),
                                 color = if (isSelected) onPrimaryColor else Color.White
-
                             )
                         }
                     }
                 }
+
                 TrackMyCardPrimaryButton(
                     text = "Add Transaction",
                     modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
                     scope.launch {
-                        currentCard?.let {
+                        clearErrors()
+                        if (currentCard != null) {
                             upsertTransaction(
                                 TransactionDataModel(
                                     title = title,
                                     description = description,
                                     amount = amount,
                                     dateTime = transactionDate,
-                                    category = "General",
+                                    category = chipList[selectedChip ?: 0],
                                     id = 0,
-                                    cardId = it.id
+                                    cardId = currentCard.id
                                 )
                             )
                         }
-//                setShowBottomSheet(false)
                     }
                 }
             }
+
             when (upsertTransactionState) {
                 is UpsertTransactionUIState.Error -> {
-                    val error = upsertTransactionState.message
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 48.dp)
-                            .background(
-                                color = surfaceColor,
-                                shape = RoundedCornerShape(8.dp)
-                            )
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = error,
-                            style = TextStyle(
-                                fontFamily = DmSansFontFamily(),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        )
+                    val error = upsertTransactionState.error
+                    when (error) {
+                        is TransactionError.CardNotFound -> titleError = error.message
+                        is TransactionError.TitleEmpty -> titleError = error.message
+                        is TransactionError.TitleTooLong -> titleError = error.message
+                        is TransactionError.DescriptionTooLong -> descriptionError = error.message
+                        is TransactionError.AmountZero -> amountError = error.message
+                        is TransactionError.AmountNegative -> amountError = error.message
+                        is TransactionError.AmountExceedsLimit -> amountError = error.message
+                        is TransactionError.DateEmpty -> dateError = error.message
+                        is TransactionError.Unknown -> {
+                            // Show general error at the bottom for unexpected errors
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(bottom = 48.dp)
+                                    .background(
+                                        color = surfaceColor,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(8.dp),
+                                    text = error.message,
+                                    style = TextStyle(
+                                        fontFamily = DmSansFontFamily(),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
-
                 UpsertTransactionUIState.Loading -> {}
                 is UpsertTransactionUIState.Success -> {
+                    resetStates()
                     setShowBottomSheet(false)
                 }
+                UpsertTransactionUIState.Idle -> {}
             }
-
         }
-
     }
 }

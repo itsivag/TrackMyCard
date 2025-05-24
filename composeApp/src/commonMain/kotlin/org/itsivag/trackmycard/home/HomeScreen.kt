@@ -1,18 +1,13 @@
 package org.itsivag.trackmycard.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
@@ -33,9 +28,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,23 +38,14 @@ import org.itsivag.trackmycard.components.TransactionListItem
 import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.itsivag.cards.viewmodel.CardsViewModel
-import com.itsivag.helper.BASE_URL
+import com.itsivag.cards.viewmodel.UserCreatedCardUIState
 import com.itsivag.models.card.CardDataModel
-import com.itsivag.models.card.CardMapperDataModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
 import com.itsivag.transactions.viewmodel.UIState
-import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
-import io.github.aakira.napier.Napier
-import io.ktor.util.sha1
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
-import org.itsivag.trackmycard.theme.surfaceColor
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,19 +66,13 @@ internal fun HomeScreen(
     val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
     val upsertTransactionState by transactionViewModel.upsertTransactionState.collectAsStateWithLifecycle()
+    val upsertCardState by cardViewModel.upsertCardState.collectAsStateWithLifecycle()
 
     var currentCard by remember { mutableStateOf<CardDataModel?>(null) }
-    var currentCardMapper by remember { mutableStateOf<CardMapperDataModel.Card?>(null) }
-    LaunchedEffect(currentCard) {
-        currentCardMapper = cardMapper?.cards?.find { it.id == currentCard?.id }
-    }
-
-    val height = LocalWindowInfo.current.containerSize.height
 
 
     LaunchedEffect(currentCard) {
         transactionViewModel.getTransactionsWithCardFilter(currentCard?.id)
-        Napier.v { "summa" + "$BASE_URL/${currentCardMapper?.imgUrl}" }
     }
 
     LaunchedEffect(cards) {
@@ -114,7 +91,8 @@ internal fun HomeScreen(
             sheetState = addTransactionSheetState,
             upsertTransaction = { transactionViewModel.upsertTransaction(it) },
             currentCard = currentCard,
-            upsertTransactionState = upsertTransactionState
+            upsertTransactionState = upsertTransactionState,
+            clearErrorState = { transactionViewModel.clearErrorState() }
         )
     }
 
@@ -123,25 +101,36 @@ internal fun HomeScreen(
             setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
             sheetState = addCardSheetState,
             upsertCard = { cardViewModel.upsertCard(it) },
-            cardMapperList = cardMapper
+            cardMapperList = cardMapper,
+            upsertCardState = upsertCardState,
+            clearErrorState = { cardViewModel.clearErrorState() }
         )
     }
     val hazeState = rememberHazeState()
     LazyColumn(modifier = Modifier.padding(paddingValues)) {
         item {
             Box {
+//                AsyncImage(
+//                    model = ImageRequest.Builder(LocalPlatformContext.current)
+//                        .data("https://raw.githubusercontent.com/itsivag/TrackMyCardPublicData/main/sample.webp")
+//                        .crossfade(true)
+//                        .build(),
+//                    contentDescription = "WebP Image",
+//                    modifier = Modifier.fillMaxWidth().height((height * 0.1).dp)
+//                        .hazeSource(hazeState)
+//                )
                 when (cards) {
-                    is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Error -> {
+                    is UserCreatedCardUIState.Error -> {
                         Text("Error getting your cards!")
                     }
 
-                    com.itsivag.cards.viewmodel.UserCreatedCardUIState.Loading -> {
+                    UserCreatedCardUIState.Loading -> {
                         CircularProgressIndicator()
                     }
 
-                    is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success -> {
+                    is UserCreatedCardUIState.Success -> {
                         val card =
-                            (cards as com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success).cardDataModel
+                            (cards as UserCreatedCardUIState.Success).cardDataModel
                         CardPager(
                             cards = card ?: emptyList(),
                             modifier = Modifier.padding(bottom = 8.dp),
@@ -150,6 +139,8 @@ internal fun HomeScreen(
                             setCurrentCard = { currentCard = it }
                         )
                     }
+
+                    UserCreatedCardUIState.Idle -> {}
                 }
             }
         }
@@ -179,26 +170,7 @@ internal fun HomeScreen(
                         )
                     }
                 }
-                Box(
-                    modifier = Modifier.border(
-                        width = 1.dp,
-                        color = surfaceColor,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalPlatformContext.current)
-                            .data("$BASE_URL/${currentCardMapper?.imgUrl}")
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "WebP Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .hazeSource(hazeState)
-                    )
-                }
             }
-
         }
         item {
             Row(
@@ -227,18 +199,8 @@ internal fun HomeScreen(
         when (transactions) {
             is UIState.Error -> {
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "Add a card to see your transactions",
-                            style = TextStyle(
-                                fontFamily = DmSansFontFamily(),
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp
-                            )
-                        )
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("Error Getting your transactions!")
                     }
                 }
             }
@@ -251,32 +213,14 @@ internal fun HomeScreen(
 
             is UIState.Success -> {
                 val t = (transactions as UIState.Success).transactionDataModel
-                if (t.isNullOrEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "No transactions recorded",
-                                style = TextStyle(
-                                    fontFamily = DmSansFontFamily(),
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 16.sp
-                                )
-                            )
-                        }
-                    }
-                } else {
-                    items(t.size.coerceAtMost(5)) { index ->
-                        val transaction = t[index]
-                        TransactionListItem(
-                            title = transaction.title,
-                            description = transaction.description,
-                            amount = transaction.amount,
-                            dateTime = transaction.dateTime
-                        )
-                    }
+                items(t?.size?.coerceAtMost(5) ?: 0) { index ->
+                    val transaction = t?.get(index)
+                    TransactionListItem(
+                        title = transaction?.title ?: "",
+                        description = transaction?.description ?: "",
+                        amount = transaction?.amount ?: 0.0,
+                        dateTime = transaction?.dateTime ?: ""
+                    )
                 }
             }
         }

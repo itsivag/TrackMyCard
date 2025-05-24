@@ -2,6 +2,7 @@ package com.itsivag.transactions.repo
 
 import com.itsivag.models.transaction.TransactionDataModel
 import com.itsivag.transactions.data.TransactionsLocalDataService
+import com.itsivag.transactions.error.TransactionError
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 
@@ -14,13 +15,16 @@ interface TransactionsRepo {
 class TransactionsRepoImpl(private val transactionsLocalDataService: TransactionsLocalDataService) :
     TransactionsRepo {
     override suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean> {
-        try {
+        return try {
             validateTransaction(transaction)
             transactionsLocalDataService.upsertTransaction(transaction)
-            return Result.success(true)
+            Result.success(true)
+        } catch (e: TransactionError) {
+            Napier.e("Validation error", e)
+            Result.failure(e)
         } catch (e: Exception) {
             Napier.e("Error upserting transaction", e)
-            return Result.failure(e)
+            Result.failure(TransactionError.Unknown(e.message ?: "Unknown error occurred"))
         }
     }
 
@@ -37,7 +41,7 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
     override suspend fun getTransactionsWithCardFilter(cardId: String): Result<Flow<List<TransactionDataModel>>> {
         try {
             if (cardId.isBlank()) {
-                throw IllegalArgumentException("Card ID cannot be empty")
+                throw TransactionError.CardNotFound
             }
             val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
             return Result.success(res)
@@ -50,14 +54,14 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
     private fun validateTransaction(transaction: TransactionDataModel) {
         with(transaction) {
             when {
-                cardId.isBlank() -> throw IllegalArgumentException("Card not found")
-                title.isBlank() -> throw IllegalArgumentException("Title cannot be empty")
-                title.length > 50 -> throw IllegalArgumentException("Title cannot be longer than 50 characters")
-                description.length > 100 -> throw IllegalArgumentException("Description cannot be longer than 100 characters")
-                amount == 0.0 -> throw IllegalArgumentException("Amount cannot be zero")
-                amount < 0 -> throw IllegalArgumentException("Amount cannot be negative")
-                amount > 1_000_000_000 -> throw IllegalArgumentException("Amount exceeds maximum limit")
-                dateTime.isBlank() -> throw IllegalArgumentException("Date cannot be empty")
+                cardId.isBlank() -> throw TransactionError.CardNotFound
+                title.isBlank() -> throw TransactionError.TitleEmpty
+                title.length > 50 -> throw TransactionError.TitleTooLong(50)
+                description.length > 100 -> throw TransactionError.DescriptionTooLong(100)
+                amount == 0.0 -> throw TransactionError.AmountZero
+                amount < 0 -> throw TransactionError.AmountNegative
+                amount > 1_000_000_000 -> throw TransactionError.AmountExceedsLimit
+                dateTime.isBlank() -> throw TransactionError.DateEmpty
             }
         }
     }

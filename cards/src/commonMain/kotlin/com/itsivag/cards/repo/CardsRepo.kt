@@ -1,50 +1,63 @@
 package com.itsivag.cards.repo
 
 import com.itsivag.cards.data.local.CardsLocalDataService
+import com.itsivag.cards.data.local.EncryptedCardLocalDataService
 import com.itsivag.cards.data.remote.CardsRemoteDataService
+import com.itsivag.cards.error.CardError
 import com.itsivag.models.card.CardDataModel
 import com.itsivag.models.card.CardMapperDataModel
+import com.itsivag.models.encrypted_card.EncryptedCardDataModel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
-import kotlinx.io.files.Path
 
 interface CardsRepo {
-    suspend fun upsertCard(card: CardDataModel): Result<Boolean>
     suspend fun getAllUserCreatedCards(): Result<Flow<List<CardDataModel>>>
     suspend fun getCardMapper(): Result<CardMapperDataModel>
     suspend fun getCardByPath(path: String): Result<CardDataModel>
+    suspend fun upsertCard(card: CardDataModel, encryptedCard: EncryptedCardDataModel): Result<Boolean>
 }
 
 class CardsRepoImpl(
     private val cardsRemoteDataService: CardsRemoteDataService,
-    private val cardsLocalDataService: CardsLocalDataService
+    private val cardsLocalDataService: CardsLocalDataService,
+    private val encryptedCardLocalDataService: EncryptedCardLocalDataService
 ) : CardsRepo {
 
     override suspend fun getCardMapper(): Result<CardMapperDataModel> {
-        try {
-            return Result.success(cardsRemoteDataService.getCardMapper())
+        return try {
+            val res = cardsRemoteDataService.getCardMapper()
+            Result.success(res)
         } catch (e: Exception) {
-            Napier.e { e.toString() }
-            return Result.failure(e)
+            Napier.e("Error getting card mapper", e)
+            Result.failure(e)
         }
     }
 
     override suspend fun getCardByPath(path: String): Result<CardDataModel> {
-        try {
-            return Result.success(cardsRemoteDataService.getCarByPath(path))
+        return try {
+            val res = cardsRemoteDataService.getCarByPath(path)
+            Result.success(res)
         } catch (e: Exception) {
-            Napier.e { e.toString() }
-            return Result.failure(e)
+            Napier.e("Error getting card by path", e)
+            Result.failure(e)
         }
     }
 
-    override suspend fun upsertCard(card: CardDataModel): Result<Boolean> {
-        try {
+    override suspend fun upsertCard(
+        card: CardDataModel,
+        encryptedCard: EncryptedCardDataModel
+    ): Result<Boolean> {
+        return try {
+            validateCard(encryptedCard)
+//            encryptedCardLocalDataService.upsertEncryptedCard(encryptedCard)
             cardsLocalDataService.upsertCard(card)
-            return Result.success(true)
+            Result.success(true)
+        } catch (e: CardError) {
+            Napier.e("Validation error", e)
+            Result.failure(e)
         } catch (e: Exception) {
-            Napier.e { e.toString() }
-            return Result.failure(e)
+            Napier.e("Error upserting card", e)
+            Result.failure(CardError.Unknown(e.message ?: "Unknown error occurred"))
         }
     }
 
@@ -58,5 +71,17 @@ class CardsRepoImpl(
         }
     }
 
+    private fun validateCard(encryptedCard: EncryptedCardDataModel) {
+        with(encryptedCard) {
+            when {
+                id.isBlank() -> throw CardError.CardNotFound
+                limit == 0.0 -> throw CardError.LimitZero
+                limit < 0 -> throw CardError.LimitNegative
+                limit > 1_000_000_000 -> throw CardError.LimitExceedsMaximum
+                cycle == 0 -> throw CardError.CycleEmpty
+                cycle < 1 || cycle > 31 -> throw CardError.CycleInvalid
+            }
+        }
+    }
 
 }

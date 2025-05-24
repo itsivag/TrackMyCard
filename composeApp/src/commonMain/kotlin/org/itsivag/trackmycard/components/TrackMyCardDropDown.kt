@@ -22,6 +22,7 @@ fun TrackMyCardDropDown(
     options: List<String>,
     value: String,
     setOnValueChange: (String) -> Unit,
+    error: String?,
     modifier: Modifier = Modifier
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -35,6 +36,7 @@ fun TrackMyCardDropDown(
             label = label,
             value = value,
             readOnly = true,
+            error = error,
             modifier = modifier
                 .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
                 .focusRequester(focusRequester),

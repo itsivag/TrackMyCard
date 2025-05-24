@@ -23,7 +23,8 @@ fun TrackMyCardEditTextWithDatePicker(
     editTextLabel: String,
     value: String,
     modifier: Modifier = Modifier,
-    setShowDatePicker: (Boolean) -> Unit
+    setShowDatePicker: (Boolean) -> Unit,
+    error: String?
 ) {
     Row(
         modifier = modifier,
@@ -35,6 +36,7 @@ fun TrackMyCardEditTextWithDatePicker(
             readOnly = true,
             modifier = Modifier.padding(end = 8.dp)
                 .weight(1f),
+            error = error,
             onValueChange = {}
         )
 
