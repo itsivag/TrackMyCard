@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -191,7 +194,19 @@ internal fun HomeScreen(
         when (transactions) {
             is UIState.Error -> {
                 item {
-                    Text("Error Getting your transactions!")
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            "Add a card to see your transactions",
+                            style = TextStyle(
+                                fontFamily = DmSansFontFamily(),
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
+                            )
+                        )
+                    }
                 }
             }
 
@@ -203,14 +218,32 @@ internal fun HomeScreen(
 
             is UIState.Success -> {
                 val t = (transactions as UIState.Success).transactionDataModel
-                items(t?.size?.coerceAtMost(5) ?: 0) { index ->
-                    val transaction = t?.get(index)
-                    TransactionListItem(
-                        title = transaction?.title ?: "",
-                        description = transaction?.description ?: "",
-                        amount = transaction?.amount ?: 0.0,
-                        dateTime = transaction?.dateTime ?: ""
-                    )
+                if (t.isNullOrEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No transactions recorded",
+                                style = TextStyle(
+                                    fontFamily = DmSansFontFamily(),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 16.sp
+                                )
+                            )
+                        }
+                    }
+                } else {
+                    items(t.size.coerceAtMost(5)) { index ->
+                        val transaction = t[index]
+                        TransactionListItem(
+                            title = transaction.title,
+                            description = transaction.description,
+                            amount = transaction.amount,
+                            dateTime = transaction.dateTime
+                        )
+                    }
                 }
             }
         }
