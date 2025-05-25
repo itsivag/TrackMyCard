@@ -20,4 +20,7 @@ interface TransactionsDao {
 
     @Query("SELECT * FROM transactions WHERE cardId = :cardId")
     fun getTransactionsWithCardFilter(cardId: String): Flow<List<TransactionDataModel>>
+
+    @Query("SELECT SUM(amount) FROM transactions WHERE cardId = :cardId")
+    fun getUtilisedAmountForCard(cardId: String): Flow<Double>
 }

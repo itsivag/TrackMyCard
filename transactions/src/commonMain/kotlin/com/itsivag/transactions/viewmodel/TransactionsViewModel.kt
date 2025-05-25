@@ -113,13 +113,15 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
         }
     }
 
-    fun getUtilisedLimit(cardId : String) {
+    fun getUtilisedLimit(cardId: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            val res = transactionsRepo.getUtilisedLimit(cardId)
-            res.onSuccess {
-                _utilisedLimitState.value = it
+            val res = cardId?.let { transactionsRepo.getUtilisedLimit(it) }
+            res?.onSuccess {
+                it.collect {
+                    _utilisedLimitState.value = it
+                }
             }
-            res.onFailure {
+            res?.onFailure {
                 _utilisedLimitState.value = 0.0
             }
         }

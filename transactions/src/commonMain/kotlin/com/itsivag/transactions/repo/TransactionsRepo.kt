@@ -10,19 +10,16 @@ interface TransactionsRepo {
     suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean>
     suspend fun getTransactions(): Result<Flow<List<TransactionDataModel>>>
     suspend fun getTransactionsWithCardFilter(cardId: String): Result<Flow<List<TransactionDataModel>>>
-    suspend fun getUtilisedLimit(cardId: String): Result<Double>
+    suspend fun getUtilisedLimit(cardId: String): Result<Flow<Double>>
 }
 
 class TransactionsRepoImpl(private val transactionsLocalDataService: TransactionsLocalDataService) :
     TransactionsRepo {
-    private lateinit var transactionsList: Flow<List<TransactionDataModel>>
-    private var utilisedLimit: Double = 0.0
 
     override suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean> {
         return try {
             validateTransaction(transaction)
             transactionsLocalDataService.upsertTransaction(transaction)
-            utilisedLimit += transaction.amount
             Result.success(true)
         } catch (e: TransactionError) {
             Napier.e("Validation error", e)
@@ -49,7 +46,6 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
                 throw TransactionError.CardNotFound
             }
             val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
-            transactionsList = res
 
             return Result.success(res)
         } catch (e: Exception) {
@@ -58,12 +54,10 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
         }
     }
 
-    override suspend fun getUtilisedLimit(cardId: String): Result<Double> {
+    override suspend fun getUtilisedLimit(cardId: String): Result<Flow<Double>> {
         return try {
-            transactionsList.collect {
-                utilisedLimit = it.sumOf { it.amount }
-            }
-            Result.success(utilisedLimit)
+            val res = transactionsLocalDataService.getUtilisedAmountForCard(cardId)
+            Result.success(res)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -6,8 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface TransactionsLocalDataService {
     suspend fun upsertTransaction(transaction: TransactionDataModel)
-   suspend fun getTransactions(): Flow<List<TransactionDataModel>>
-   suspend fun getTransactionsWithCardFilter(cardId: String): Flow<List<TransactionDataModel>>
+    suspend fun getTransactions(): Flow<List<TransactionDataModel>>
+    suspend fun getTransactionsWithCardFilter(cardId: String): Flow<List<TransactionDataModel>>
+    suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double>
 }
 
 class TransactionsLocalDataServiceImpl(private val transactionsDao: TransactionsDao) :
@@ -18,6 +19,10 @@ class TransactionsLocalDataServiceImpl(private val transactionsDao: Transactions
     override suspend fun getTransactions(): Flow<List<TransactionDataModel>> =
         transactionsDao.getAllTransactions()
 
-    override suspend fun getTransactionsWithCardFilter(cardId: String)  = transactionsDao.getTransactionsWithCardFilter(cardId)
+    override suspend fun getTransactionsWithCardFilter(cardId: String) =
+        transactionsDao.getTransactionsWithCardFilter(cardId)
+
+    override suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double> =
+        transactionsDao.getUtilisedAmountForCard(cardId)
 
 }

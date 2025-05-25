@@ -74,7 +74,10 @@ internal fun HomeScreen(
 
 
     LaunchedEffect(currentCard) {
-        transactionViewModel.getTransactionsWithCardFilter(currentCard?.id)
+        with(transactionViewModel) {
+            getTransactionsWithCardFilter(currentCard?.id)
+            getUtilisedLimit(currentCard?.id)
+        }
     }
 
     LaunchedEffect(cards) {
