@@ -100,8 +100,8 @@ android {
         applicationId = "org.itsivag.trackmycard"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "0.3"
 
     }
     packaging {

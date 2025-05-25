@@ -1,0 +1,23 @@
+TrackMyCard – Private Credit Card Expense Tracker
+
+Take full control of your credit card spending with TrackMyCard, a simple, secure, and privacy-first expense tracking app. Whether you're keeping tabs on daily purchases or analyzing monthly spending habits, everything stays on your device—no cloud, no tracking, no compromise.
+
+🔐 Why TrackMyCard?
+No data leaves your device – All data is stored locally.
+
+No account required – Just install and start tracking.
+
+No ads or analytics – Your activity stays private.
+
+💳 Key Features
+Add and categorize credit card expenses in seconds.
+
+View daily, weekly, and monthly summaries.
+
+Offline-first: Works without internet access.
+
+Lightweight, fast, and battery-efficient.
+
+Whether you're budgeting or just want peace of mind about your spending, TrackMyCard puts privacy and control back in your hands.
+
+📱 Simple. Private. Offline. Just you and your data.
