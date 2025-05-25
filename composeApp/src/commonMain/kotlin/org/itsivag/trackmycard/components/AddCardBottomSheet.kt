@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,11 +73,6 @@ fun AddCardBottomSheet(
         availableCardListPair?.find { it.second == cardName }?.first
     }
 
-    LaunchedEffect(cardName) {
-        Napier.v { "Selected card name: $cardName" }
-        Napier.v { "Available card list: $availableCardListPair" }
-        Napier.v { "Found card ID: $selectedCardId" }
-    }
     
     // Error states for each field
     var cardNameError by rememberSaveable { mutableStateOf<String?>(null) }

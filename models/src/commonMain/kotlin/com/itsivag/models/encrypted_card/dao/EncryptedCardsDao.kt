@@ -12,7 +12,7 @@ interface EncryptedCardsDao {
     suspend fun upsertEncryptedCard(encryptedCard: EncryptedCardDataModel)
 
     @Query("SELECT * FROM encrypted_cards")
-    fun getAllEncryptedCards(): Flow<List<EncryptedCardDataModel>>
+    fun getAllEncryptedCardData(): Flow<List<EncryptedCardDataModel>>
 
     @Query("SELECT * FROM encrypted_cards WHERE id = :id")
     suspend fun getEncryptedCardById(id: String): EncryptedCardDataModel?

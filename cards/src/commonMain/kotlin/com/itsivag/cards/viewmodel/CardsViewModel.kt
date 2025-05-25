@@ -2,6 +2,7 @@ package com.itsivag.cards.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.itsivag.cards.error.CardError
 import com.itsivag.cards.repo.CardsRepo
 import com.itsivag.models.card.CardDataModel
 import com.itsivag.models.card.CardMapperDataModel
@@ -12,8 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import com.itsivag.cards.error.CardError
-import io.github.aakira.napier.Napier
 
 class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
     private val _cardState =
@@ -26,6 +25,10 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
 
     private val _upsertCardState = MutableStateFlow<UpsertCardUIState>(UpsertCardUIState.Idle)
     val upsertCardState: StateFlow<UpsertCardUIState> = _upsertCardState.asStateFlow()
+
+    private val _encryptedCardState =
+        MutableStateFlow<EncryptedCardUIState>(EncryptedCardUIState.Idle)
+    val encryptedCardState: StateFlow<EncryptedCardUIState> = _encryptedCardState.asStateFlow()
 
     init {
         getUserCreatedCards()
@@ -53,36 +56,8 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
     fun upsertCard(encryptedCardDataModel: EncryptedCardDataModel) {
         viewModelScope.launch(Dispatchers.IO) {
             _upsertCardState.value = UpsertCardUIState.Loading
-            
-            // Validate card data
-            when {
-                encryptedCardDataModel.id.isBlank() -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.CardNotFound)
-                    return@launch
-                }
-                encryptedCardDataModel.limit == 0.0 -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.LimitZero)
-                    return@launch
-                }
-                encryptedCardDataModel.limit < 0 -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.LimitNegative)
-                    return@launch
-                }
-                encryptedCardDataModel.limit > 1_000_000_000 -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.LimitExceedsMaximum)
-                    return@launch
-                }
-                encryptedCardDataModel.cycle == 0 -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.CycleEmpty)
-                    return@launch
-                }
-                encryptedCardDataModel.cycle < 1 || encryptedCardDataModel.cycle > 31 -> {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.CycleInvalid)
-                    return@launch
-                }
-            }
-
-            val path = cardMapperState.value?.cards?.find { it.id == encryptedCardDataModel.id }?.file
+            val path =
+                cardMapperState.value?.cards?.find { it.id == encryptedCardDataModel.id }?.file
             if (path == null) {
                 _upsertCardState.value = UpsertCardUIState.Error(CardError.CardNotFound)
                 return@launch
@@ -96,7 +71,15 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
                 }
 
                 res.onFailure {
-                    _upsertCardState.value = UpsertCardUIState.Error(CardError.Unknown(it.message ?: "Error adding card"))
+                    val error = when (it.message) {
+                        "Card not found" -> CardError.CardNotFound
+                        "Limit cannot be zero" -> CardError.LimitZero
+                        "Limit cannot be negative" -> CardError.LimitNegative
+                        "Limit exceeds maximum limit" -> CardError.LimitExceedsMaximum
+                        else -> CardError.Unknown(it.message ?: "Unknown error occurred")
+
+                    }
+                    _upsertCardState.value = UpsertCardUIState.Error(error)
                 }
             }
         }
@@ -107,6 +90,22 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
             val res = cardsRepo.getCardMapper()
             res.onSuccess {
                 _cardMapperState.value = it
+            }
+        }
+    }
+
+    fun getAllEncryptedCardData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = cardsRepo.getAllEncryptedCardData()
+            res.onSuccess {
+                it.collect {
+                    _encryptedCardState.value = EncryptedCardUIState.Success(it)
+                }
+            }
+
+            res.onFailure {
+                _encryptedCardState.value =
+                    EncryptedCardUIState.Error(CardError.Unknown(it.message ?: "Error adding card"))
             }
         }
     }
@@ -128,5 +127,14 @@ sealed class UpsertCardUIState {
     data class Error(val error: CardError) : UpsertCardUIState()
     data object Loading : UpsertCardUIState()
     data object Idle : UpsertCardUIState()
+}
+
+sealed class EncryptedCardUIState {
+    data class Success(val encryptedCardDataModelList: List<EncryptedCardDataModel>) :
+        EncryptedCardUIState()
+
+    data class Error(val error: CardError) : EncryptedCardUIState()
+    data object Loading : EncryptedCardUIState()
+    data object Idle : EncryptedCardUIState()
 }
 

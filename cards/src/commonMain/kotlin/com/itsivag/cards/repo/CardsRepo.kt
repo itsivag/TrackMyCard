@@ -14,7 +14,12 @@ interface CardsRepo {
     suspend fun getAllUserCreatedCards(): Result<Flow<List<CardDataModel>>>
     suspend fun getCardMapper(): Result<CardMapperDataModel>
     suspend fun getCardByPath(path: String): Result<CardDataModel>
-    suspend fun upsertCard(card: CardDataModel, encryptedCard: EncryptedCardDataModel): Result<Boolean>
+    suspend fun upsertCard(
+        card: CardDataModel,
+        encryptedCard: EncryptedCardDataModel
+    ): Result<Boolean>
+
+    suspend fun getAllEncryptedCardData(): Result<Flow<List<EncryptedCardDataModel>>>
 }
 
 class CardsRepoImpl(
@@ -58,6 +63,15 @@ class CardsRepoImpl(
         } catch (e: Exception) {
             Napier.e("Error upserting card", e)
             Result.failure(CardError.Unknown(e.message ?: "Unknown error occurred"))
+        }
+    }
+
+    override suspend fun getAllEncryptedCardData(): Result<Flow<List<EncryptedCardDataModel>>> {
+        return try {
+            val res = encryptedCardLocalDataService.getAllEncryptedCardData()
+            Result.success(res)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

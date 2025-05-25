@@ -76,9 +76,9 @@ internal fun HomeScreen(
     }
 
     LaunchedEffect(cards) {
-        if (cards is com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success) {
+        if (cards is UserCreatedCardUIState.Success) {
             val cardList =
-                (cards as com.itsivag.cards.viewmodel.UserCreatedCardUIState.Success).cardDataModel
+                (cards as UserCreatedCardUIState.Success).cardDataModel
             if (cardList?.isNotEmpty() == true && currentCard == null) {
                 currentCard = cardList[0]
             }
