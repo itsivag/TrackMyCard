@@ -8,6 +8,7 @@ sealed class CardError : Throwable() {
     data object LimitExceedsMaximum : CardError()
     data object CycleEmpty : CardError()
     data object CycleInvalid : CardError()
+    data object CardHolderNameEmpty : CardError()
     data class Unknown(override val message: String) : CardError()
 
     override val message: String
@@ -19,6 +20,7 @@ sealed class CardError : Throwable() {
             is LimitExceedsMaximum -> "Limit exceeds maximum allowed value"
             is CycleEmpty -> "Cycle date cannot be empty"
             is CycleInvalid -> "Invalid cycle date"
+            is CardHolderNameEmpty -> "Card Holder name cannot be empty"
             is Unknown -> message
         }
 } 

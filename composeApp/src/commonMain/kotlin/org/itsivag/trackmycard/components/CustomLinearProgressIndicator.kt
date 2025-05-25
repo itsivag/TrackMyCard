@@ -26,8 +26,9 @@ import org.itsivag.trackmycard.theme.surfaceColor
 @OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 fun CustomLinearProgressIndicator(
+    limit: Double,
+    utilised: Double,
     modifier: Modifier = Modifier,
-    progress: Float,
     progressColor: Color = surfaceColor,
     backgroundColor: Color = org.itsivag.trackmycard.theme.backgroundColor,
     clipShape: Shape = RoundedCornerShape(bottomEnd = 16.dp, bottomStart = 16.dp),
@@ -45,7 +46,7 @@ fun CustomLinearProgressIndicator(
             modifier = Modifier
                 .background(progressColor)
                 .fillMaxHeight()
-                .fillMaxWidth(progress)
+                .fillMaxWidth((utilised / limit).toFloat())
                 .hazeEffect(hazeState, HazeMaterials.thick(containerColor = progressColor))
         )
         Row(
@@ -54,9 +55,9 @@ fun CustomLinearProgressIndicator(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            CustomProgressIndicatorLabel(label = "Utilised", value = "8000")
+            CustomProgressIndicatorLabel(label = "Utilised", value = utilised.toString())
             Spacer(Modifier.weight(1f))
-            CustomProgressIndicatorLabel(label = "Limit", value = "10000")
+            CustomProgressIndicatorLabel(label = "Limit", value = limit.toString())
         }
     }
 }

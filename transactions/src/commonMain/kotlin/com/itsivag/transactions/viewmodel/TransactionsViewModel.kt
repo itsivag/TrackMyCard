@@ -34,6 +34,9 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
     val transactionStateWithCardFilter: StateFlow<UIState> =
         _transactionStateWithCardFilter.asStateFlow()
 
+    private val _utilisedLimitState = MutableStateFlow<Double>(0.0)
+    val utilisedLimitState: StateFlow<Double> = _utilisedLimitState.asStateFlow()
+
     private val _upsertTransactionState =
         MutableStateFlow<UpsertTransactionUIState>(UpsertTransactionUIState.Idle)
     val upsertTransactionState: StateFlow<UpsertTransactionUIState> =
@@ -95,7 +98,10 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
                     "Card not found" -> TransactionError.CardNotFound
                     "Title cannot be empty" -> TransactionError.TitleEmpty
                     "Title cannot be longer than 50 characters" -> TransactionError.TitleTooLong(50)
-                    "Description cannot be longer than 100 characters" -> TransactionError.DescriptionTooLong(100)
+                    "Description cannot be longer than 100 characters" -> TransactionError.DescriptionTooLong(
+                        100
+                    )
+
                     "Amount cannot be zero" -> TransactionError.AmountZero
                     "Amount cannot be negative" -> TransactionError.AmountNegative
                     "Amount exceeds maximum limit" -> TransactionError.AmountExceedsLimit
@@ -103,6 +109,18 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
                     else -> TransactionError.Unknown(it.message ?: "Unknown error occurred")
                 }
                 _upsertTransactionState.value = UpsertTransactionUIState.Error(error)
+            }
+        }
+    }
+
+    fun getUtilisedLimit(cardId : String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val res = transactionsRepo.getUtilisedLimit(cardId)
+            res.onSuccess {
+                _utilisedLimitState.value = it
+            }
+            res.onFailure {
+                _utilisedLimitState.value = 0.0
             }
         }
     }

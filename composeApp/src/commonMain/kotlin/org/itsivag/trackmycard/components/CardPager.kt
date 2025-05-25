@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.encrypted_card.EncryptedCardDataModel
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -21,14 +22,14 @@ fun CardPager(
     hazeState: HazeState,
     setAddCardShowBottomSheet: (Boolean) -> Unit,
     setCurrentCard: (CardDataModel?) -> Unit,
+    encryptedCardDataModelList: List<EncryptedCardDataModel>,
+    utilisedLimit: Double,
 ) {
     val pagerState = rememberPagerState { cards.size + 1 }
     val width = LocalWindowInfo.current.containerSize.width
     val height = LocalWindowInfo.current.containerSize.height
 
-    // Initialize current card and handle page changes
     LaunchedEffect(Unit) {
-        // Set initial card
         if (cards.isNotEmpty()) {
             setCurrentCard(cards[0])
         }
@@ -54,9 +55,11 @@ fun CardPager(
                 setAddCardShowBottomSheet = { setAddCardShowBottomSheet(it) })
         } else {
             CreditCard(
+                encryptedCardData = encryptedCardDataModelList[page],
                 card = cards[page],
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                hazeState = hazeState
+                hazeState = hazeState,
+                utilisedLimit = utilisedLimit
             )
         }
     }

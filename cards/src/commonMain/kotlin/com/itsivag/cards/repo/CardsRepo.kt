@@ -54,8 +54,8 @@ class CardsRepoImpl(
     ): Result<Boolean> {
         return try {
             validateCard(encryptedCard)
-//            encryptedCardLocalDataService.upsertEncryptedCard(encryptedCard)
             cardsLocalDataService.upsertCard(card)
+            encryptedCardLocalDataService.upsertEncryptedCard(encryptedCard)
             Result.success(true)
         } catch (e: CardError) {
             Napier.e("Validation error", e)
@@ -94,6 +94,7 @@ class CardsRepoImpl(
                 limit > 1_000_000_000 -> throw CardError.LimitExceedsMaximum
                 cycle == 0 -> throw CardError.CycleEmpty
                 cycle < 1 || cycle > 31 -> throw CardError.CycleInvalid
+                cardHolderName.isBlank() -> throw CardError.CardHolderNameEmpty
             }
         }
     }

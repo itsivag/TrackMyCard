@@ -57,13 +57,10 @@ fun AddCardBottomSheet(
     val scope = rememberCoroutineScope()
     var cardName by rememberSaveable { mutableStateOf("") }
     val availableCardListPair = cardMapperList?.cards?.map { it.id to it.name }
-    
-    LaunchedEffect(cardMapperList) {
-        Napier.v { "Card mapper list: ${cardMapperList?.cards?.map { it.id to it.name }}" }
-    }
-    
+
     var limitText by rememberSaveable { mutableStateOf("") }
     val limit: Double = limitText.toDoubleOrNull() ?: 0.0
+    var cardHolderName by rememberSaveable { mutableStateOf("") }
 
     var cycle by rememberSaveable { mutableStateOf("") }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
@@ -73,17 +70,19 @@ fun AddCardBottomSheet(
         availableCardListPair?.find { it.second == cardName }?.first
     }
 
-    
+
     // Error states for each field
     var cardNameError by rememberSaveable { mutableStateOf<String?>(null) }
     var limitError by rememberSaveable { mutableStateOf<String?>(null) }
     var cycleError by rememberSaveable { mutableStateOf<String?>(null) }
+    var cardHolderNameError by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Clear errors when any field changes
     fun clearErrors() {
         cardNameError = null
         limitError = null
         cycleError = null
+        cardHolderNameError = null
         clearErrorState()
     }
 
@@ -92,6 +91,7 @@ fun AddCardBottomSheet(
         cardName = ""
         limitText = ""
         cycle = ""
+        cardHolderName = ""
         clearErrors()
     }
 
@@ -188,6 +188,19 @@ fun AddCardBottomSheet(
                     )
                 }
 
+                TrackMyCardTextInputField(
+                    label = "Card Holder Name",
+                    value = cardHolderName,
+                    singleLine = true,
+                    showCharacterCount = true,
+                    error = cardHolderNameError,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                    onValueChange = { newInput ->
+                        cardHolderName = newInput
+                        clearErrors()
+                    }
+                )
+
                 TrackMyCardPrimaryButton(
                     text = "Add Card",
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -198,16 +211,19 @@ fun AddCardBottomSheet(
                             cardName.isBlank() -> {
                                 cardNameError = "Please select a card"
                             }
+
                             selectedCardId == null -> {
                                 cardNameError = "Invalid card selection"
                                 Napier.e { "Card ID is null for card name: $cardName" }
                             }
+
                             else -> {
                                 upsertCard(
                                     EncryptedCardDataModel(
                                         id = selectedCardId,
                                         limit = limit,
-                                        cycle = cycle.safeConvertToInt()
+                                        cycle = cycle.safeConvertToInt(),
+                                        cardHolderName = cardHolderName
                                     )
                                 )
                             }
@@ -228,6 +244,7 @@ fun AddCardBottomSheet(
                     is CardError.CycleEmpty -> cycleError = error.message
                     is CardError.CycleInvalid -> cycleError = error.message
                     is CardError.CardNameEmpty -> cardNameError = error.message
+                    is CardError.CardHolderNameEmpty -> cardHolderNameError = error.message
 
                     is CardError.Unknown -> {
                         // Show general error at the bottom for unexpected errors

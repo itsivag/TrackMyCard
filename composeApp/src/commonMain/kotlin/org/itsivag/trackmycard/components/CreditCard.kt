@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.itsivag.helper.OnestFontFamily
 import com.itsivag.models.card.CardDataModel
+import com.itsivag.models.encrypted_card.EncryptedCardDataModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -35,7 +36,9 @@ import org.itsivag.trackmycard.utils.CardNetworkImageMapper
 fun CreditCard(
     card: CardDataModel,
     modifier: Modifier = Modifier,
-    hazeState: HazeState
+    hazeState: HazeState,
+    encryptedCardData: EncryptedCardDataModel,
+    utilisedLimit: Double
 ) {
     val hazeStyle = HazeMaterials.regular(containerColor = backgroundColor)
     val gradientBrush = Brush.linearGradient(
@@ -44,6 +47,8 @@ fun CreditCard(
             Color(card.presentation.decoration.secondaryColor),
         )
     )
+
+
     Column(
         modifier = modifier
             .border(brush = gradientBrush, width = 1.dp, shape = RoundedCornerShape(16.dp))
@@ -106,7 +111,7 @@ fun CreditCard(
                             fontSize = 12.sp
                         )
                         Text(
-                            text = "Siva G",
+                            text = encryptedCardData.cardHolderName,
                             color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
@@ -139,7 +144,8 @@ fun CreditCard(
 
         }
         CustomLinearProgressIndicator(
-            progress = 0.5f,
+            limit = encryptedCardData.limit,
+            utilised = utilisedLimit,
             modifier = Modifier.fillMaxWidth(),
             progressColor = Color(card.presentation.decoration.primaryColor),
             hazeState = hazeState,

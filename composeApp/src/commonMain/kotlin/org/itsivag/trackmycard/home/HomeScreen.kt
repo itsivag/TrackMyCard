@@ -39,6 +39,7 @@ import org.itsivag.trackmycard.theme.onBackgroundColor
 import org.itsivag.trackmycard.theme.primaryColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.itsivag.cards.viewmodel.CardsViewModel
+import com.itsivag.cards.viewmodel.EncryptedCardUIState
 import com.itsivag.cards.viewmodel.UserCreatedCardUIState
 import com.itsivag.models.card.CardDataModel
 import com.itsivag.transactions.viewmodel.TransactionsViewModel
@@ -67,7 +68,8 @@ internal fun HomeScreen(
     val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
     val upsertTransactionState by transactionViewModel.upsertTransactionState.collectAsStateWithLifecycle()
     val upsertCardState by cardViewModel.upsertCardState.collectAsStateWithLifecycle()
-
+    val encryptedCardData by cardViewModel.encryptedCardState.collectAsStateWithLifecycle()
+    val utilisedLimitState by transactionViewModel.utilisedLimitState.collectAsStateWithLifecycle()
     var currentCard by remember { mutableStateOf<CardDataModel?>(null) }
 
 
@@ -131,13 +133,25 @@ internal fun HomeScreen(
                     is UserCreatedCardUIState.Success -> {
                         val card =
                             (cards as UserCreatedCardUIState.Success).cardDataModel
-                        CardPager(
-                            cards = card ?: emptyList(),
-                            modifier = Modifier.padding(bottom = 8.dp),
-                            hazeState = hazeState,
-                            setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
-                            setCurrentCard = { currentCard = it }
-                        )
+
+
+                        when (encryptedCardData) {
+                            is EncryptedCardUIState.Error -> {}
+                            EncryptedCardUIState.Idle -> {}
+                            EncryptedCardUIState.Loading -> {}
+                            is EncryptedCardUIState.Success -> {
+                                CardPager(
+                                    encryptedCardDataModelList = (encryptedCardData as EncryptedCardUIState.Success).encryptedCardDataModelList,
+                                    cards = card ?: emptyList(),
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    hazeState = hazeState,
+                                    setAddCardShowBottomSheet = { addCardShowBottomSheet = it },
+                                    setCurrentCard = { currentCard = it },
+                                    utilisedLimit = utilisedLimitState
+                                )
+                            }
+                        }
+
                     }
 
                     UserCreatedCardUIState.Idle -> {}

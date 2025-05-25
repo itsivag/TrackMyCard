@@ -26,5 +26,7 @@ data class EncryptedCardDataModel(
     @SerialName("limit")
     val limit: Double,
     @SerialName("cycle")
-    val cycle: Int
+    val cycle: Int,
+    @SerialName("card_holder_name")
+    val cardHolderName: String
 )

@@ -33,6 +33,7 @@ class CardsViewModel(private val cardsRepo: CardsRepo) : ViewModel() {
     init {
         getUserCreatedCards()
         getCardMapper()
+        getAllEncryptedCardData()
     }
 
     fun getUserCreatedCards() {
