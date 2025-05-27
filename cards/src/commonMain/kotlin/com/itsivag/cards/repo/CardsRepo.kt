@@ -52,17 +52,17 @@ class CardsRepoImpl(
         card: CardDataModel,
         encryptedCard: EncryptedCardDataModel
     ): Result<Boolean> {
-        return try {
+        try {
             validateCard(encryptedCard)
             cardsLocalDataService.upsertCard(card)
             encryptedCardLocalDataService.upsertEncryptedCard(encryptedCard)
-            Result.success(true)
+            return Result.success(true)
         } catch (e: CardError) {
             Napier.e("Validation error", e)
-            Result.failure(e)
+            return Result.failure(e)
         } catch (e: Exception) {
             Napier.e("Error upserting card", e)
-            Result.failure(CardError.Unknown(e.message ?: "Unknown error occurred"))
+            return Result.failure(CardError.Unknown(e.message ?: "Unknown error occurred"))
         }
     }
 

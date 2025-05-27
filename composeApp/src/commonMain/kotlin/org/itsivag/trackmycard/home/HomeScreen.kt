@@ -85,7 +85,7 @@ internal fun HomeScreen(
             val cardList =
                 (cards as UserCreatedCardUIState.Success).cardDataModel
             if (cardList?.isNotEmpty() == true && currentCard == null) {
-                currentCard = cardList[0]
+                currentCard = cardList.firstOrNull()
             }
         }
     }

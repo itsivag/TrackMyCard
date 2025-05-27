@@ -5,6 +5,9 @@ import com.itsivag.transactions.data.TransactionsLocalDataService
 import com.itsivag.transactions.error.TransactionError
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 
 interface TransactionsRepo {
     suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean>
@@ -46,7 +49,6 @@ class TransactionsRepoImpl(private val transactionsLocalDataService: Transaction
                 throw TransactionError.CardNotFound
             }
             val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
-
             return Result.success(res)
         } catch (e: Exception) {
             Napier.e("Error getting transactions with card filter", e)

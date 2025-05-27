@@ -31,7 +31,7 @@ fun CardPager(
 
     LaunchedEffect(Unit) {
         if (cards.isNotEmpty()) {
-            setCurrentCard(cards[0])
+            setCurrentCard(cards.firstOrNull())
         }
     }
 
@@ -55,7 +55,7 @@ fun CardPager(
                 setAddCardShowBottomSheet = { setAddCardShowBottomSheet(it) })
         } else {
             CreditCard(
-                encryptedCardData = encryptedCardDataModelList[page],
+                encryptedCardData = encryptedCardDataModelList.find { it.id == cards[page].id },
                 card = cards[page],
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 hazeState = hazeState,

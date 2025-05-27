@@ -37,7 +37,7 @@ fun CreditCard(
     card: CardDataModel,
     modifier: Modifier = Modifier,
     hazeState: HazeState,
-    encryptedCardData: EncryptedCardDataModel,
+    encryptedCardData: EncryptedCardDataModel?,
     utilisedLimit: Double
 ) {
     val hazeStyle = HazeMaterials.regular(containerColor = backgroundColor)
@@ -111,7 +111,7 @@ fun CreditCard(
                             fontSize = 12.sp
                         )
                         Text(
-                            text = encryptedCardData.cardHolderName,
+                            text = encryptedCardData?.cardHolderName ?: "",
                             color = Color.White,
                             fontFamily = OnestFontFamily(),
                             fontSize = 16.sp,
@@ -144,7 +144,7 @@ fun CreditCard(
 
         }
         CustomLinearProgressIndicator(
-            limit = encryptedCardData.limit,
+            limit = encryptedCardData?.limit ?: 0.0,
             utilised = utilisedLimit,
             modifier = Modifier.fillMaxWidth(),
             progressColor = Color(card.presentation.decoration.primaryColor),
@@ -152,10 +152,6 @@ fun CreditCard(
             hazeStyle = hazeStyle
         )
     }
-}
-
-private fun formatCardNumber(cardNumber: String): String {
-    return cardNumber.chunked(4).joinToString(" ")
 }
 
 enum class CardNetwork(val network: String) {

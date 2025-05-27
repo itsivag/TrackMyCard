@@ -131,9 +131,7 @@ sealed class UpsertCardUIState {
 }
 
 sealed class EncryptedCardUIState {
-    data class Success(val encryptedCardDataModelList: List<EncryptedCardDataModel>) :
-        EncryptedCardUIState()
-
+    data class Success(val encryptedCardDataModelList: List<EncryptedCardDataModel>) : EncryptedCardUIState()
     data class Error(val error: CardError) : EncryptedCardUIState()
     data object Loading : EncryptedCardUIState()
     data object Idle : EncryptedCardUIState()
