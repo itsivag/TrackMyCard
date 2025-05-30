@@ -4,6 +4,7 @@ import com.itsivag.cards.data.local.CardsLocalDataService
 import com.itsivag.cards.data.local.EncryptedCardLocalDataService
 import com.itsivag.cards.data.remote.CardsRemoteDataService
 import com.itsivag.cards.error.CardError
+import com.itsivag.crypto.CryptoHelper
 import com.itsivag.models.card.CardDataModel
 import com.itsivag.models.card.CardMapperDataModel
 import com.itsivag.models.encrypted_card.EncryptedCardDataModel
@@ -25,7 +26,8 @@ interface CardsRepo {
 class CardsRepoImpl(
     private val cardsRemoteDataService: CardsRemoteDataService,
     private val cardsLocalDataService: CardsLocalDataService,
-    private val encryptedCardLocalDataService: EncryptedCardLocalDataService
+    private val encryptedCardLocalDataService: EncryptedCardLocalDataService,
+    private val cryptoHelper : CryptoHelper
 ) : CardsRepo {
 
     override suspend fun getCardMapper(): Result<CardMapperDataModel> {

@@ -1,4 +1,5 @@
 package com.itsivag.crypto
 
-class MyClass {
+actual class CryptoHelper {
+
 }

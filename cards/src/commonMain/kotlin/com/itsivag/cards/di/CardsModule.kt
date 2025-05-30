@@ -10,6 +10,7 @@ import com.itsivag.cards.repo.CardsRepo
 import com.itsivag.cards.repo.CardsRepoImpl
 import com.itsivag.cards.util.httpClientWithLogger
 import com.itsivag.cards.viewmodel.CardsViewModel
+import com.itsivag.crypto.CryptoHelper
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
@@ -26,6 +27,9 @@ val cardsModule = module {
     singleOf(::CardsRemoteDataServiceImpl).bind<CardsRemoteDataService>()
     singleOf(::CardsLocalDataServiceImpl).bind<CardsLocalDataService>()
     singleOf(::EncryptedCardLocalDataServiceImpl).bind<EncryptedCardLocalDataService>()
+
+    //crypto
+    singleOf(::CryptoHelper)
 
     // Repositories
     singleOf(::CardsRepoImpl).bind<CardsRepo>()
