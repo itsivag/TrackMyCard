@@ -27,7 +27,7 @@ class CardsRepoImpl(
     private val cardsRemoteDataService: CardsRemoteDataService,
     private val cardsLocalDataService: CardsLocalDataService,
     private val encryptedCardLocalDataService: EncryptedCardLocalDataService,
-    private val cryptoHelper : CryptoHelper
+    private val cryptoHelper: CryptoHelper
 ) : CardsRepo {
 
     override suspend fun getCardMapper(): Result<CardMapperDataModel> {
@@ -57,7 +57,10 @@ class CardsRepoImpl(
         try {
             validateCard(encryptedCard)
             cardsLocalDataService.upsertCard(card)
-            encryptedCardLocalDataService.upsertEncryptedCard(encryptedCard)
+            with(cryptoHelper) {
+                val encryptedCardData = encryptedCard.encryptFields()
+                encryptedCardLocalDataService.upsertEncryptedCard(encryptedCardData)
+            }
             return Result.success(true)
         } catch (e: CardError) {
             Napier.e("Validation error", e)
