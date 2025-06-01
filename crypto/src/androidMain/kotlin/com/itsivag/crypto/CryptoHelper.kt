@@ -1,5 +1,6 @@
 package com.itsivag.crypto
 
+import android.util.Base64
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -7,6 +8,7 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 
 actual class CryptoHelper {
     companion object {
@@ -36,14 +38,17 @@ actual class CryptoHelper {
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec)
         val encrypted = cipher.doFinal(data)
 
-        // Prepend IV to the encrypted data so we can use it for decryption
-        return iv + encrypted
+        // Prepend IV to the encrypted data and encode as Base64
+        return Base64.encode(iv + encrypted, Base64.NO_WRAP)
     }
 
     actual fun aesDecrypt(encryptedData: ByteArray): ByteArray {
+        // Decode from Base64 first
+        val decodedData = Base64.decode(encryptedData, Base64.NO_WRAP)
+        
         // Extract IV from the beginning of the encrypted data
-        val iv = encryptedData.copyOfRange(0, IV_SIZE)
-        val actualEncryptedData = encryptedData.copyOfRange(IV_SIZE, encryptedData.size)
+        val iv = decodedData.copyOfRange(0, IV_SIZE)
+        val actualEncryptedData = decodedData.copyOfRange(IV_SIZE, decodedData.size)
 
         val cipher = getCipher()
         val ivParameterSpec = IvParameterSpec(iv)
@@ -52,38 +57,47 @@ actual class CryptoHelper {
         return cipher.doFinal(actualEncryptedData)
     }
 
-    actual inline fun <reified T : Any> T.encryptFields(): T {
-        val clazz = T::class.java
-        val constructor = clazz.declaredConstructors.first()
-        constructor.isAccessible = true
-        val properties = clazz.kotlin.memberProperties
-        val encryptedValues = properties.map { property ->
-            val value = (property as KProperty1<T, *>).get(this)
-            if (value is String) {
-                aesEncrypt(value.toByteArray()).toString()
-            } else {
-                value
+    actual inline fun <reified T : Any> T.encryptFields(vararg exclusions: String): T {
+        val clazz = T::class
+        val constructor = clazz.primaryConstructor
+            ?: throw IllegalArgumentException("No primary constructor found")
+        val properties = clazz.memberProperties.associate { it.name to it }
+
+        val arguments = constructor.parameters.associate { parameter ->
+            val property = properties[parameter.name] as? KProperty1<T, *>
+            val value = property?.get(this)
+            val encryptedValue = when {
+                exclusions.contains(parameter.name) -> value
+                value is String -> String(aesEncrypt(value.toByteArray()))
+                value is Number -> {
+                    // For numeric values, we encrypt them as strings
+                    String(aesEncrypt(value.toString().toByteArray()))
+                }
+                else -> value
             }
-        }.toTypedArray()
-        @Suppress("UNCHECKED_CAST")
-        return constructor.newInstance(*encryptedValues) as T
+            parameter to encryptedValue
+        }
+
+        return constructor.callBy(arguments)
     }
 
-    actual inline fun <reified T : Any> T.decryptFields(cryptoHelper: CryptoHelper): T {
-        val clazz = T::class.java
-        val constructor = clazz.declaredConstructors.first()
-        constructor.isAccessible = true
-        val properties = clazz.kotlin.memberProperties
-        val decryptedValues = properties.map { property ->
-            val value = (property as KProperty1<T, *>).get(this)
-            if (value is String) {
-                String(cryptoHelper.aesDecrypt(value.toByteArray()))
-            } else {
-                value
-            }
-        }.toTypedArray()
-        @Suppress("UNCHECKED_CAST")
-        return constructor.newInstance(*decryptedValues) as T
-    }
+    actual inline fun <reified T : Any> T.decryptFields(vararg exclusions: String): T {
+        val clazz = T::class
+        val constructor = clazz.primaryConstructor
+            ?: throw IllegalArgumentException("No primary constructor found")
+        val properties = clazz.memberProperties.associate { it.name to it }
 
+        val arguments = constructor.parameters.associate { parameter ->
+            val property = properties[parameter.name] as? KProperty1<T, *>
+            val value = property?.get(this)
+            val decryptedValue = when {
+                exclusions.contains(parameter.name) -> value
+                value is String -> String(aesDecrypt(value.toByteArray()))
+                else -> value
+            }
+            parameter to decryptedValue
+        }
+
+        return constructor.callBy(arguments)
+    }
 }

@@ -9,11 +9,11 @@ actual class CryptoHelper {
         return encryptedData
     }
 
-    actual inline fun <reified T : Any> T.decryptFields(cryptoHelper: CryptoHelper): T{
+    actual inline fun <reified T : Any> T.decryptFields(vararg exclusions : String): T{
         return this
     }
 
-    actual inline fun <reified T : Any> T.encryptFields(): T {
+    actual inline fun <reified T : Any> T.encryptFields(vararg exclusions : String): T {
         return this
     }
 }

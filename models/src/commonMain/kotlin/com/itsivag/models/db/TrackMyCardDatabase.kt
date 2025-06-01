@@ -7,12 +7,13 @@ import com.itsivag.models.card.CardDataModel
 import com.itsivag.models.card.CardDataModelConverters
 import com.itsivag.models.card.dao.CardsDao
 import com.itsivag.models.encrypted_card.EncryptedCardDataModel
+import com.itsivag.models.encrypted_card.EncryptedCardStorageModel
 import com.itsivag.models.encrypted_card.dao.EncryptedCardsDao
 import com.itsivag.models.transaction.TransactionDataModel
 import com.itsivag.models.transaction.dao.TransactionsDao
 
 @Database(
-    entities = [CardDataModel::class, TransactionDataModel::class, EncryptedCardDataModel::class],
+    entities = [CardDataModel::class, TransactionDataModel::class, EncryptedCardStorageModel::class],
     version = 3,
     exportSchema = false
 )

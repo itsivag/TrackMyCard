@@ -8,8 +8,10 @@ import com.itsivag.crypto.CryptoHelper
 import com.itsivag.models.card.CardDataModel
 import com.itsivag.models.card.CardMapperDataModel
 import com.itsivag.models.encrypted_card.EncryptedCardDataModel
+import com.itsivag.models.encrypted_card.EncryptedCardStorageModel
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 interface CardsRepo {
     suspend fun getAllUserCreatedCards(): Result<Flow<List<CardDataModel>>>
@@ -58,8 +60,14 @@ class CardsRepoImpl(
             validateCard(encryptedCard)
             cardsLocalDataService.upsertCard(card)
             with(cryptoHelper) {
-                val encryptedCardData = encryptedCard.encryptFields()
-                encryptedCardLocalDataService.upsertEncryptedCard(encryptedCardData)
+                val storageModel = EncryptedCardStorageModel(
+                    id = encryptedCard.id,
+                    limit = encryptedCard.limit.toString(),
+                    cycle = encryptedCard.cycle.toString(),
+                    cardHolderName = encryptedCard.cardHolderName
+                ).encryptFields(exclusions = arrayOf("id"))
+                
+                encryptedCardLocalDataService.upsertEncryptedCard(storageModel)
             }
             return Result.success(true)
         } catch (e: CardError) {
@@ -74,8 +82,32 @@ class CardsRepoImpl(
     override suspend fun getAllEncryptedCardData(): Result<Flow<List<EncryptedCardDataModel>>> {
         return try {
             val res = encryptedCardLocalDataService.getAllEncryptedCardData()
-            Result.success(res)
+            val convertedFlow = res.map { list ->
+                list.map { storageModel ->
+                    try {
+                        with(cryptoHelper) {
+                            val decryptedModel = storageModel.decryptFields(exclusions = arrayOf("id"))
+                            EncryptedCardDataModel(
+                                id = decryptedModel.id,
+                                limit = decryptedModel.limit.toDouble(),
+                                cycle = decryptedModel.cycle.toInt(),
+                                cardHolderName = decryptedModel.cardHolderName
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Napier.e("Error decrypting card data", e)
+                        EncryptedCardDataModel(
+                            id = storageModel.id,
+                            limit = 0.0,
+                            cycle = 1,
+                            cardHolderName = "Error decrypting card"
+                        )
+                    }
+                }
+            }
+            Result.success(convertedFlow)
         } catch (e: Exception) {
+            Napier.e("Error getting encrypted card data", e)
             Result.failure(e)
         }
     }
