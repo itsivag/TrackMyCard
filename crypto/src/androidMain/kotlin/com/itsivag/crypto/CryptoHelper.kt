@@ -6,6 +6,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -15,10 +16,12 @@ actual class CryptoHelper {
         private const val AES = "AES"
         private const val AES_CBC_PKCS = "AES/CBC/PKCS5Padding"
         private const val IV_SIZE = 16 // AES block size
+        private const val DUMMY_KEY = "ThisIsA32ByteLongSecretKeyForAES"
     }
 
     private val secretKey by lazy {
         generateAESKey()
+//        SecretKeySpec(DUMMY_KEY.toByteArray(), AES)
     }
 
     private fun getCipher(): Cipher = Cipher.getInstance(AES_CBC_PKCS)
@@ -45,7 +48,7 @@ actual class CryptoHelper {
     actual fun aesDecrypt(encryptedData: ByteArray): ByteArray {
         // Decode from Base64 first
         val decodedData = Base64.decode(encryptedData, Base64.NO_WRAP)
-        
+
         // Extract IV from the beginning of the encrypted data
         val iv = decodedData.copyOfRange(0, IV_SIZE)
         val actualEncryptedData = decodedData.copyOfRange(IV_SIZE, decodedData.size)
@@ -73,6 +76,7 @@ actual class CryptoHelper {
                     // For numeric values, we encrypt them as strings
                     String(aesEncrypt(value.toString().toByteArray()))
                 }
+
                 else -> value
             }
             parameter to encryptedValue

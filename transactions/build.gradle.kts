@@ -31,6 +31,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":models"))
+            implementation(project(":crypto"))
 
             implementation(libs.ktor.client.core)
             implementation(libs.kotlinx.coroutines.core)

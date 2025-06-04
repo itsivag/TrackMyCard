@@ -1,5 +1,7 @@
 package com.itsivag.transactions.repo
 
+import com.itsivag.crypto.CryptoHelper
+import com.itsivag.models.transaction.EncryptedTransactionModel
 import com.itsivag.models.transaction.TransactionDataModel
 import com.itsivag.transactions.data.TransactionsLocalDataService
 import com.itsivag.transactions.error.TransactionError
@@ -8,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 interface TransactionsRepo {
     suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean>
@@ -16,43 +19,133 @@ interface TransactionsRepo {
     suspend fun getUtilisedLimit(cardId: String): Result<Flow<Double>>
 }
 
-class TransactionsRepoImpl(private val transactionsLocalDataService: TransactionsLocalDataService) :
+class TransactionsRepoImpl(
+    private val transactionsLocalDataService: TransactionsLocalDataService,
+    private val cryptoHelper: CryptoHelper
+) :
     TransactionsRepo {
 
     override suspend fun upsertTransaction(transaction: TransactionDataModel): Result<Boolean> {
-        return try {
+        try {
             validateTransaction(transaction)
-            transactionsLocalDataService.upsertTransaction(transaction)
-            Result.success(true)
+            with(cryptoHelper) {
+                transaction.apply {
+                    EncryptedTransactionModel(
+                        id = id,
+                        title = title,
+                        description = description,
+                        category = category,
+                        dateTime = dateTime,
+                        amount = amount.toString(),
+                        cardId = cardId
+                    ).encryptFields(exclusions = arrayOf("id", "cardId"))
+                        .also {
+                            transactionsLocalDataService.upsertTransaction(it)
+                        }
+                }
+                return Result.success(true)
+            }
         } catch (e: TransactionError) {
             Napier.e("Validation error", e)
-            Result.failure(e)
+            return Result.failure(e)
         } catch (e: Exception) {
             Napier.e("Error upserting transaction", e)
-            Result.failure(TransactionError.Unknown(e.message ?: "Unknown error occurred"))
+            return Result.failure(TransactionError.Unknown(e.message ?: "Unknown error occurred"))
         }
     }
 
     override suspend fun getTransactions(): Result<Flow<List<TransactionDataModel>>> {
-        try {
+        return try {
             val res = transactionsLocalDataService.getTransactions()
-            return Result.success(res)
+            val convertedFlow = res.map {
+                it.map { encryptedTransactionDataModel ->
+                    try {
+                        with(cryptoHelper) {
+                            encryptedTransactionDataModel.decryptFields(
+                                exclusions = arrayOf(
+                                    "id",
+                                    "cardId"
+                                )
+                            )
+                                .run {
+                                    TransactionDataModel(
+                                        id = id,
+                                        title = title,
+                                        description = description,
+                                        category = category,
+                                        cardId = cardId,
+                                        amount = amount.toDouble(),
+                                        dateTime = dateTime
+                                    )
+                                }
+                        }
+                    } catch (e: Exception) {
+                        Napier.e("Error decrypting transaction data ", e)
+                        TransactionDataModel(
+                            id = -1,
+                            title = "",
+                            description = "",
+                            category = "",
+                            dateTime = "",
+                            amount = 0.0,
+                            cardId = ""
+                        )
+                    }
+                }
+            }
+            Result.success(convertedFlow)
         } catch (e: Exception) {
             Napier.e("Error getting all transactions", e)
-            return Result.failure(e)
+            Result.failure(e)
         }
     }
 
     override suspend fun getTransactionsWithCardFilter(cardId: String): Result<Flow<List<TransactionDataModel>>> {
-        try {
+        return try {
             if (cardId.isBlank()) {
                 throw TransactionError.CardNotFound
             }
             val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
-            return Result.success(res)
+            val convertedFlow = res.map {
+                it.map { encryptedTransactionDataModel ->
+                    try {
+                        with(cryptoHelper) {
+                            encryptedTransactionDataModel.decryptFields(
+                                exclusions = arrayOf(
+                                    "id",
+                                    "cardId"
+                                )
+                            )
+                                .run {
+                                    TransactionDataModel(
+                                        id = id,
+                                        title = title,
+                                        description = description,
+                                        category = category,
+                                        cardId = cardId,
+                                        amount = amount.toDouble(),
+                                        dateTime = dateTime
+                                    )
+                                }
+                        }
+                    } catch (e: Exception) {
+                        Napier.e("Error decrypting transaction data ", e)
+                        TransactionDataModel(
+                            id = -1,
+                            title = "",
+                            description = "",
+                            category = "",
+                            dateTime = "",
+                            amount = 0.0,
+                            cardId = ""
+                        )
+                    }
+                }
+            }
+            Result.success(convertedFlow)
         } catch (e: Exception) {
             Napier.e("Error getting transactions with card filter", e)
-            return Result.failure(e)
+            Result.failure(e)
         }
     }
 
