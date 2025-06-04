@@ -20,8 +20,8 @@ actual class CryptoHelper {
     }
 
     private val secretKey by lazy {
-        generateAESKey()
-//        SecretKeySpec(DUMMY_KEY.toByteArray(), AES)
+//        generateAESKey()
+        SecretKeySpec(DUMMY_KEY.toByteArray(), AES)
     }
 
     private fun getCipher(): Cipher = Cipher.getInstance(AES_CBC_PKCS)
