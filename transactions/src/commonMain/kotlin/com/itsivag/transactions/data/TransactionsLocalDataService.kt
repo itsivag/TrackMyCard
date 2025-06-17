@@ -8,7 +8,7 @@ interface TransactionsLocalDataService {
     suspend fun upsertTransaction(transaction: EncryptedTransactionModel)
     suspend fun getTransactions(): Flow<List<EncryptedTransactionModel>>
     suspend fun getTransactionsWithCardFilter(cardId: String): Flow<List<EncryptedTransactionModel>>
-    suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double>
+//    suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double>
 }
 
 class TransactionsLocalDataServiceImpl(private val transactionsDao: TransactionsDao) :
@@ -22,7 +22,7 @@ class TransactionsLocalDataServiceImpl(private val transactionsDao: Transactions
     override suspend fun getTransactionsWithCardFilter(cardId: String) =
         transactionsDao.getTransactionsWithCardFilter(cardId)
 
-    override suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double> =
-        transactionsDao.getUtilisedAmountForCard(cardId)
+//    override suspend fun getUtilisedAmountForCard(cardId: String): Flow<Double> =
+//        transactionsDao.getUtilisedAmountForCard(cardId)
 
 }

@@ -151,12 +151,52 @@ class TransactionsRepoImpl(
 
     override suspend fun getUtilisedLimit(cardId: String): Result<Flow<Double>> {
         return try {
-            val res = transactionsLocalDataService.getUtilisedAmountForCard(cardId)
-            Result.success(res)
+            if (cardId.isBlank()) {
+                throw TransactionError.CardNotFound
+            }
+            val res = transactionsLocalDataService.getTransactionsWithCardFilter(cardId)
+            val convertedFlow = res.map {
+                it.map { encryptedTransactionDataModel ->
+                    try {
+                        with(cryptoHelper) {
+                            encryptedTransactionDataModel.decryptFields(
+                                exclusions = arrayOf(
+                                    "id",
+                                    "cardId"
+                                )
+                            ).run {
+                                TransactionDataModel(
+                                    id = id,
+                                    title = title,
+                                    description = description,
+                                    category = category,
+                                    cardId = cardId,
+                                    amount = amount.toDouble(),
+                                    dateTime = dateTime
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Napier.e("Error decrypting transaction data ", e)
+                        TransactionDataModel(
+                            id = -1,
+                            title = "",
+                            description = "",
+                            category = "",
+                            dateTime = "",
+                            amount = 0.0,
+                            cardId = ""
+                        )
+                    }
+                }.sumOf { it.amount }
+            }
+            Result.success(convertedFlow)
         } catch (e: Exception) {
+            Napier.e("Error getting transactions with card filter", e)
             Result.failure(e)
         }
     }
+
 
     private fun validateTransaction(transaction: TransactionDataModel) {
         with(transaction) {
