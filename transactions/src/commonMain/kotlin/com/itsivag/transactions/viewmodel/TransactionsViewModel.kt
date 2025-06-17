@@ -42,6 +42,10 @@ class TransactionsViewModel(private val transactionsRepo: TransactionsRepo) : Vi
     val upsertTransactionState: StateFlow<UpsertTransactionUIState> =
         _upsertTransactionState.asStateFlow()
 
+    private val _refillCardState =
+        MutableStateFlow<UpsertTransactionUIState>(UpsertTransactionUIState.Idle)
+    val refillCardState: StateFlow<UpsertTransactionUIState> = _refillCardState.asStateFlow()
+
 
     init {
         getAllTransactions()

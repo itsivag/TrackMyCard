@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -47,6 +48,7 @@ import com.itsivag.transactions.viewmodel.UIState
 import dev.chrisbanes.haze.rememberHazeState
 import org.itsivag.trackmycard.components.AddCardBottomSheet
 import org.itsivag.trackmycard.components.AddTransactionBottomSheet
+import org.itsivag.trackmycard.components.AddRefillAmountCardBottomSheet
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,15 +60,20 @@ internal fun HomeScreen(
     cardViewModel: CardsViewModel = koinViewModel<CardsViewModel>()
 ) {
     val addTransactionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showAddTransactionBottomSheet by remember { mutableStateOf(false) }
 
     val addCardSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var addCardShowBottomSheet by remember { mutableStateOf(false) }
+
+    val refillCardSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showRefillCardShowBottomSheet by remember { mutableStateOf(false) }
+
 
     val cards by cardViewModel.cardState.collectAsStateWithLifecycle()
     val cardMapper by cardViewModel.cardMapperState.collectAsStateWithLifecycle()
     val transactions by transactionViewModel.transactionStateWithCardFilter.collectAsStateWithLifecycle()
     val upsertTransactionState by transactionViewModel.upsertTransactionState.collectAsStateWithLifecycle()
+    val refillCardState by transactionViewModel.refillCardState.collectAsStateWithLifecycle()
     val upsertCardState by cardViewModel.upsertCardState.collectAsStateWithLifecycle()
     val encryptedCardData by cardViewModel.encryptedCardState.collectAsStateWithLifecycle()
     val utilisedLimitState by transactionViewModel.utilisedLimitState.collectAsStateWithLifecycle()
@@ -90,9 +97,9 @@ internal fun HomeScreen(
         }
     }
 
-    if (showBottomSheet) {
+    if (showAddTransactionBottomSheet) {
         AddTransactionBottomSheet(
-            setShowBottomSheet = { showBottomSheet = it },
+            setShowBottomSheet = { showAddTransactionBottomSheet = it },
             sheetState = addTransactionSheetState,
             upsertTransaction = { transactionViewModel.upsertTransaction(it) },
             currentCard = currentCard,
@@ -109,6 +116,17 @@ internal fun HomeScreen(
             cardMapperList = cardMapper,
             upsertCardState = upsertCardState,
             clearErrorState = { cardViewModel.clearErrorState() }
+        )
+    }
+
+    if (showRefillCardShowBottomSheet) {
+        AddRefillAmountCardBottomSheet(
+            setShowBottomSheet = { showRefillCardShowBottomSheet = it },
+            sheetState = refillCardSheetState,
+            refillCard = { },
+            cardMapperList = cardMapper,
+            refillCardState = refillCardState,
+            clearErrorState = { transactionViewModel.clearErrorState() }
         )
     }
     val hazeState = rememberHazeState()
@@ -162,10 +180,13 @@ internal fun HomeScreen(
             }
         }
         item {
-            Row(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)) {
+            Row(
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
+            ) {
                 OutlinedButton(
+                    modifier = Modifier.padding(end = 8.dp).weight(1f),
                     onClick = {
-                        showBottomSheet = true
+                        showAddTransactionBottomSheet = true
                     },
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = onBackgroundColor)
@@ -181,6 +202,32 @@ internal fun HomeScreen(
                         )
                         Text(
                             text = "Add Transaction",
+                            fontFamily = DmSansFontFamily(),
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+                OutlinedButton(
+                    modifier = Modifier.padding(start = 8.dp).weight(1f),
+                    onClick = {
+                        //refill card
+                        showRefillCardShowBottomSheet = true
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = onBackgroundColor)
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = "Refill card",
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text(
+                            text = "Refill card",
                             fontFamily = DmSansFontFamily(),
                             fontWeight = FontWeight.Medium,
                             fontSize = 14.sp
@@ -243,6 +290,4 @@ internal fun HomeScreen(
         }
     }
 }
-
-
 
